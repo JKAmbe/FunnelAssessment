@@ -19,6 +19,7 @@ class FUNNELASSESSMENT_API UFunnelBehaviourTree : public UBehaviourTree
 public:
 	UTreeNode* SetupTree(UCharacterMovementComponent* NewMovementComponent);
 
+	URandomPatrolNode* RootNode;
 	UCharacterMovementComponent* MoveComp;
 	float MoveSpeed = 100.0f;
 };

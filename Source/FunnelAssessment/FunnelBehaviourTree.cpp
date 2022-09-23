@@ -7,11 +7,11 @@ UTreeNode* UFunnelBehaviourTree::SetupTree(UCharacterMovementComponent* NewMovem
 {
 
 	UE_LOG(LogTemp, Warning, TEXT("Hi"));
-	if (NewMovementComponent != nullptr)
-	{
-		MoveComp = NewMovementComponent;
-	}
-	URandomPatrolNode* Random1 = NewObject<URandomPatrolNode>();
+	//if (NewMovementComponent != nullptr)
+	//{
+	//	MoveComp = NewMovementComponent;
+	//}
+	URandomPatrolNode* Random1 = CreateDefaultSubobject<URandomPatrolNode>(TEXT("Random1"));
 	RootNode = Random1;
 	return RootNode;
 }
