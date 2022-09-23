@@ -8,19 +8,15 @@ AFunnel::AFunnel()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	FunnelBehaviourTree = FindComponentByClass<UBehaviourTree>();
+	BehaviourTree = FindComponentByClass<UFunnelBehaviourTree>();
+	MoveComp = FindComponentByClass<UCharacterMovementComponent>();
 }
 
 // Called when the game starts or when spawned
 void AFunnel::BeginPlay()
 {
 	Super::BeginPlay();
-	FunnelBehaviourTree = FindComponentByClass<UBehaviourTree>();
-	if (FunnelBehaviourTree != nullptr)
-	{
-		FunnelBehaviourTree->SayHi();
-	}
-	
+	BehaviourTree->SetupTree(MoveComp);
 }
 
 // Called every frame

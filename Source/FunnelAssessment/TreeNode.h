@@ -4,30 +4,39 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Engine/GameEngine.h"
-#include "TreeNode.h"
-#include "BehaviourTree.generated.h"
+#include "TreeNode.generated.h"
 
+UENUM()
+enum class NodeState : uint8
+{
+	RUNNING,
+	SUCCESS,
+	FAILURE
+};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class FUNNELASSESSMENT_API UBehaviourTree : public UActorComponent
+class FUNNELASSESSMENT_API UTreeNode : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this component's properties
-	UBehaviourTree();
+	UTreeNode();
+	UTreeNode(TArray<UTreeNode*> NewChildren);
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	NodeState State;
+	TArray<UTreeNode*> Children;
+
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual NodeState RunState();
 
-	UTreeNode* SetupTree();
+	void Attach(UTreeNode* Node);
 
-	UTreeNode* RootNode = nullptr;
-		
+	UTreeNode* ParentNode;
 };
