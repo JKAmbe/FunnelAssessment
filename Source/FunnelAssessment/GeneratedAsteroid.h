@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ProceduralMeshComponent.h"
-#include "GeneratedAsteroidMesh.h"
+#include "GeneratedAsteroidMesh2.h"
 #include "GeneratedAsteroid.generated.h"
 
 UCLASS()
@@ -22,11 +22,19 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	UProceduralMeshComponent* MeshComponent;
 	USceneComponent* LocationComponent;
+	//UPROPERTY(VisibleAnywhere)
+	//	TArray<UProceduralMeshComponent*> PCGMeshes;
+	//UPROPERTY(VisibleAnywhere)
+	//	TArray<UGeneratedAsteroidMesh2*> GeneratedAsteroidMeshes;
+	UPROPERTY(VisibleAnywhere)
+		TArray<UGeneratedAsteroidMesh2*> GeneratedAsteroidMeshes;
+	int32 Size = 5;
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	void GenerateAsteroidMesh();
 
 };
