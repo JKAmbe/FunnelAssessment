@@ -1,39 +1,33 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "GeneratedAsteroidMesh2.h"
+#include "GeneratedAsteroidMesh3.h"
 
-// Sets default values for this component's properties
-UGeneratedAsteroidMesh2::UGeneratedAsteroidMesh2()
+// Sets default values
+AGeneratedAsteroidMesh3::AGeneratedAsteroidMesh3()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+ 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
 
-	// ...
+
+	Mesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Mesh Component"));
 }
 
-
-// Called when the game starts
-void UGeneratedAsteroidMesh2::BeginPlay()
+// Called when the game starts or when spawned
+void AGeneratedAsteroidMesh3::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// ...
 	
 }
 
-
 // Called every frame
-void UGeneratedAsteroidMesh2::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void AGeneratedAsteroidMesh3::Tick(float DeltaTime)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	Super::Tick(DeltaTime);
 
-	// ...
 }
 
-// call from GeneratedAsteroid to set up new mesh
-void UGeneratedAsteroidMesh2::SetupMesh(int32 newSize, FVector newUpDir)
+void AGeneratedAsteroidMesh3::SetupMesh(int32 newSize, FVector newUpDir)
 {
 
 	this->Size = newSize;
@@ -46,7 +40,7 @@ void UGeneratedAsteroidMesh2::SetupMesh(int32 newSize, FVector newUpDir)
 }
 
 // use to generate mesh facing a direction
-void UGeneratedAsteroidMesh2::GenerateMesh()
+void AGeneratedAsteroidMesh3::GenerateMesh()
 {
 	Triangles.Empty();
 	Vertices.Empty();

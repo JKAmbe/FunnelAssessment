@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ProceduralMeshComponent.h"
-#include "GeneratedAsteroidMesh2.h"
+#include "GeneratedAsteroidMesh3.h"
 #include "GeneratedAsteroid.generated.h"
 
 UCLASS()
@@ -27,8 +27,11 @@ public:
 	//	TArray<UProceduralMeshComponent*> PCGMeshes;
 	//UPROPERTY(VisibleAnywhere)
 	//	TArray<UGeneratedAsteroidMesh2*> GeneratedAsteroidMeshes;
+	//UPROPERTY(VisibleAnywhere)
+	//	TArray<UGeneratedAsteroidMesh2*> GeneratedAsteroidMeshes;
+
 	UPROPERTY(VisibleAnywhere)
-		TArray<UGeneratedAsteroidMesh2*> GeneratedAsteroidMeshes;
+		TArray<AGeneratedAsteroidMesh3*> GeneratedAsteroidMeshes;
 	int32 Size = 5;
 
 public:	
