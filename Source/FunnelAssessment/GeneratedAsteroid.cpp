@@ -37,6 +37,9 @@ void AGeneratedAsteroid::Tick(float DeltaTime)
 
 void AGeneratedAsteroid::GenerateAsteroidMesh()
 {
+	AGeneratedAsteroidMesh3* newGenAsteroid = NewObject<AGeneratedAsteroidMesh3>();
+	newGenAsteroid->SetupMesh(Size, FVector(0, 0, 1));
+
 	// lol
 	//for (int32 i = 0; i < 6; i++)
 	//{

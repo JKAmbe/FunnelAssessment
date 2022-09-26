@@ -28,10 +28,7 @@ public:
 	//UPROPERTY(VisibleAnywhere)
 	//	TArray<UGeneratedAsteroidMesh2*> GeneratedAsteroidMeshes;
 	//UPROPERTY(VisibleAnywhere)
-	//	TArray<UGeneratedAsteroidMesh2*> GeneratedAsteroidMeshes;
-
-	UPROPERTY(VisibleAnywhere)
-		TArray<AGeneratedAsteroidMesh3*> GeneratedAsteroidMeshes;
+	//	TArray<UGeneratedAsteroidMesh2*> GeneratedAsteroidMeshe
 	int32 Size = 5;
 
 public:	
