@@ -11,14 +11,12 @@ AGeneratedAsteroidMesh3::AGeneratedAsteroidMesh3()
 
 
 	Mesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Mesh Component"));
-	SetupMesh(1000000000, FVector(1, 0, 0));
 }
 
 // Called when the game starts or when spawned
 void AGeneratedAsteroidMesh3::BeginPlay()
 {
-	Super::BeginPlay();
-	
+	Super::BeginPlay();	
 }
 
 // Called every frame
@@ -57,7 +55,7 @@ void AGeneratedAsteroidMesh3::GenerateMesh()
 			FVector2D percent = FVector2D(X, Y) / (Size - 1);
 			// add vertex
 			//FVector VertexPoint = FVector((percent.X - 0.5f) * 2 * LocalA.X, (percent.Y - 0.5f) * 2 * LocalB.Y, LocalUp.Z);
-			FVector VertexPoint = LocalUp + (percent.X - .5f) * 2 * LocalA + (percent.Y - .5f) * 2 * LocalB;
+			FVector VertexPoint = (LocalUp + (percent.X - .5f) * 2 * LocalA + (percent.Y - .5f) * 2 * LocalB) * Size;
 			//Vertices.Add(FVector(X * Size, Y * Size, 1));
 			Vertices.Add(VertexPoint);
 			// add UV coordinates

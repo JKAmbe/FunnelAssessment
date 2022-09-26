@@ -23,7 +23,8 @@ protected:
 
 public:
 	UProceduralMeshComponent* Mesh;
-	int32 Size;
+	UPROPERTY(EditAnywhere)
+		int32 Size;
 	FVector LocalUp;
 	FVector LocalA;
 	FVector LocalB;
@@ -38,6 +39,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void SetupMesh(int32 newSize, FVector newUpDir);
+	UFUNCTION(BlueprintCallable)
+		void SetupMesh(int32 newSize, FVector newUpDir);
 	void GenerateMesh();
 };

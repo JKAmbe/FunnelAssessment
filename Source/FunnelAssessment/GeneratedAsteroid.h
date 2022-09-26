@@ -29,7 +29,8 @@ public:
 	//	TArray<UGeneratedAsteroidMesh2*> GeneratedAsteroidMeshes;
 	//UPROPERTY(VisibleAnywhere)
 	//	TArray<UGeneratedAsteroidMesh2*> GeneratedAsteroidMeshe
-	int32 Size = 5;
+	UPROPERTY(BlueprintReadWrite)
+		int32 Size = 6;
 
 public:	
 	// Called every frame
