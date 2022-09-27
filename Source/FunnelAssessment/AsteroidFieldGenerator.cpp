@@ -45,7 +45,7 @@ void AAsteroidFieldGenerator::SpawnPointer()
 			{
 				// starting from -MaxHeight, set Z as i * SpaceBetween and Spawn a asteroid point
 				float AsteroidPointZ = BaseHeight + (i * SpaceBetween);
-				GetWorld()->SpawnActor<AActor>(AsteroidToSpawn, FVector(x * SpaceBetween, y * SpaceBetween, AsteroidPointZ), FRotator(), FActorSpawnParameters());
+				GetWorld()->SpawnActor<AActor>(AsteroidToSpawn, this->GetActorLocation() + FVector(x * SpaceBetween, y * SpaceBetween, AsteroidPointZ), this->GetActorRotation() + FRotator(), FActorSpawnParameters());
 			}
 		}
 	}

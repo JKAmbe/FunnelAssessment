@@ -22,7 +22,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	USceneComponent* LocationComponent;
+	UStaticMeshComponent* RootComponent;
 
 	UPROPERTY(BlueprintReadWrite)
 		int32 Size = 6;

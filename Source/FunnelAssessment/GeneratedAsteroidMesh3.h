@@ -23,7 +23,11 @@ protected:
 
 public:
 	UProceduralMeshComponent* Mesh;
+
+	UMaterial* Material;
+
 	int32 Size;
+	int32 BaseTriangleSize = 10;
 	FVector LocalUp;
 	FVector LocalA;
 	FVector LocalB;
@@ -39,6 +43,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable)
-		void SetupMesh(int32 newSize, FVector newUpDir);
+		void SetupMesh(int32 newSize, FVector newUpDir, UMaterial* newMaterial);
 	void GenerateMesh();
 };

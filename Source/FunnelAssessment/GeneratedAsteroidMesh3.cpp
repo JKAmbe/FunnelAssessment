@@ -25,7 +25,7 @@ void AGeneratedAsteroidMesh3::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void AGeneratedAsteroidMesh3::SetupMesh(int32 newSize, FVector newUpDir)
+void AGeneratedAsteroidMesh3::SetupMesh(int32 newSize, FVector newUpDir, UMaterial* newMaterial)
 {
 
 	this->Size = newSize;
@@ -33,6 +33,7 @@ void AGeneratedAsteroidMesh3::SetupMesh(int32 newSize, FVector newUpDir)
 	this->LocalA = FVector(LocalUp.Y, LocalUp.Z, LocalUp.X);
 	this->LocalB = LocalUp.CrossProduct(LocalUp, LocalA);
 	UE_LOG(LogTemp, Warning, TEXT("Hi %i"), Size);
+	Material = newMaterial;
 	GenerateMesh();
 }
 
@@ -53,8 +54,10 @@ void AGeneratedAsteroidMesh3::GenerateMesh()
 			FVector2D percent = FVector2D(X, Y) / (Size - 1);
 			// add vertex
 			//FVector VertexPoint = FVector((percent.X - 0.5f) * 2 * LocalA.X, (percent.Y - 0.5f) * 2 * LocalB.Y, LocalUp.Z);
-			FVector VertexPoint = (LocalUp + (percent.X - .5f) * 2 * LocalA + (percent.Y - .5f) * 2 * LocalB) * Size;
 			//Vertices.Add(FVector(X * Size, Y * Size, 1));
+			FVector VertexPoint = (LocalUp + (percent.X - .5f) * 2 * LocalA + (percent.Y - .5f) * 2 * LocalB) * Size * BaseTriangleSize;
+			// use noise to offset the vertex point
+
 			Vertices.Add(VertexPoint);
 			// add UV coordinates
 			UVCoords.Add(FVector2D(X, Y));
@@ -76,22 +79,6 @@ void AGeneratedAsteroidMesh3::GenerateMesh()
 	UKismetProceduralMeshLibrary::CalculateTangentsForMesh(Vertices, Triangles, UVCoords, Normals, Tangents);
 	Mesh->CreateMeshSection(0, Vertices, Triangles, Normals, UVCoords, TArray<FColor>(), Tangents, true);
 
-	//Vertices.Add(FVector(0.0f, 0.0f, 0.0f));
-	//Vertices.Add(FVector(0.0f, 100.0f, 0.0f));
-	//Vertices.Add(FVector(100.0f, 100.0f, 0.0f));
-	//Vertices.Add(FVector(100.0f, 0.0f, 0.0f));
-
-	//Triangles.Add(0);
-	//Triangles.Add(1);
-	//Triangles.Add(3);
-	//Triangles.Add(3);
-	//Triangles.Add(1);
-	//Triangles.Add(2);
-
-	//UVCoords.Add(FVector2D(0.0f, 0.0f));
-	//UVCoords.Add(FVector2D(0.0f, 1.0f));
-	//UVCoords.Add(FVector2D(1.0f, 1.0f));
-	//UVCoords.Add(FVector2D(1.0f, 0.0f));
-
-	//Mesh->CreateMeshSection(0, Vertices, Triangles, TArray<FVector>(), UVCoords, TArray<FColor>(), TArray<FProcMeshTangent>(), true);
+	// Apply material
+	Mesh->SetMaterial(0, Material);
 }
