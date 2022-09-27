@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "GeneratedAsteroid.h"
+#include "EngineUtils.h"
 #include "AsteroidPoint.h"
 #include "AsteroidFieldGenerator.generated.h"
 
@@ -26,23 +28,30 @@ public:
 
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<AActor> AsteroidToSpawn;
+	UPROPERTY(EditAnywhere)
+		bool GenerateNewField = false;
 
-	UPROPERTY(EditAnywhere, Category="Asteroid Field Generation")
+	UPROPERTY(EditAnywhere, Category="Asteroid Field Generation Setting")
 		int32 AsteroidFieldX = 10;
-	UPROPERTY(EditAnywhere, Category = "Asteroid Field Generation")
+	UPROPERTY(EditAnywhere, Category = "Asteroid Field Generation Setting")
 		int32 AsteroidFieldY = 10;
-	UPROPERTY(EditAnywhere, Category="Asteroid Field Generation")
+	UPROPERTY(EditAnywhere, Category="Asteroid Field Generation Setting")
 		float SpaceBetween = 500.0;
-	UPROPERTY(EditAnywhere, Category = "Asteroid Field Generation")
+	UPROPERTY(EditAnywhere, Category = "Asteroid Field Generation Setting")
 		int32 MaxAsteroidPerPoint = 24;
-	UPROPERTY(EditAnywhere, Category = "Asteroid Field Generation")
+	UPROPERTY(EditAnywhere, Category = "Asteroid Field Generation Setting")
 		float PerlinScale;
-	UPROPERTY(EditAnywhere, Category = "Asteroid Field Generation")
+	UPROPERTY(EditAnywhere, Category = "Asteroid Field Generation Setting")
 		float PerlinRoughness;
+
+	UPROPERTY(VisibleAnywhere)
+	TArray<AActor*> Asteroids;
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	void SpawnPointer();
+	virtual bool ShouldTickIfViewportsOnly() const override;
+	void ClearAsteroidField();
+	void SpawnAsteroidField();
 
 };

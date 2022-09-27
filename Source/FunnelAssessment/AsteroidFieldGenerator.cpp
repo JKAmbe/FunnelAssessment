@@ -17,7 +17,6 @@ AAsteroidFieldGenerator::AAsteroidFieldGenerator()
 void AAsteroidFieldGenerator::BeginPlay()
 {
 	Super::BeginPlay();
-	SpawnPointer();
 }
 
 // Called every frame
@@ -25,9 +24,39 @@ void AAsteroidFieldGenerator::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (GenerateNewField)
+	{
+		ClearAsteroidField();
+		SpawnAsteroidField();
+		GenerateNewField = false;
+	}
 }
 
-void AAsteroidFieldGenerator::SpawnPointer()
+bool AAsteroidFieldGenerator::ShouldTickIfViewportsOnly() const
+{
+	return true;
+}
+
+void AAsteroidFieldGenerator::ClearAsteroidField()
+{
+	//for (auto i : Asteroids)
+	//{
+	//	i->Destroy();
+	//}
+	//auto ClassName = Asteroids[0]->GetClass()->GetName();
+	//for (TActorIterator<ClassName> It(GetWorld()); It; ++It)
+	//{
+	//	(*It)->Destroy();
+	//}
+	//Asteroids.Empty();
+	for (int32 i = 0; i < Asteroids.Num(); i++)
+	{
+		Asteroids[i]->Destroy();
+	}
+	Asteroids.Empty();
+}
+
+void AAsteroidFieldGenerator::SpawnAsteroidField()
 {
 	// place a asteroid point for each width and height
 
@@ -45,7 +74,8 @@ void AAsteroidFieldGenerator::SpawnPointer()
 			{
 				// starting from -MaxHeight, set Z as i * SpaceBetween and Spawn a asteroid point
 				float AsteroidPointZ = BaseHeight + (i * SpaceBetween);
-				GetWorld()->SpawnActor<AActor>(AsteroidToSpawn, this->GetActorLocation() + FVector(x * SpaceBetween, y * SpaceBetween, AsteroidPointZ), this->GetActorRotation() + FRotator(), FActorSpawnParameters());
+				auto newAsteroid = GetWorld()->SpawnActor<AActor>(AsteroidToSpawn, this->GetActorLocation() + FVector(x * SpaceBetween, y * SpaceBetween, AsteroidPointZ), this->GetActorRotation() + FRotator(), FActorSpawnParameters());
+				Asteroids.Add(newAsteroid);
 			}
 		}
 	}
