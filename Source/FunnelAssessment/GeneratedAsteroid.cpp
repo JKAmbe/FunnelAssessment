@@ -22,5 +22,4 @@ void AGeneratedAsteroid::BeginPlay()
 void AGeneratedAsteroid::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }

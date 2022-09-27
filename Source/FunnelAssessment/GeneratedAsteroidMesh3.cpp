@@ -83,7 +83,6 @@ void AGeneratedAsteroidMesh3::GenerateMesh()
 				Triangles.Add((Y + 1) * Size + X + 1);
 			}
 			i++;
-			UE_LOG(LogTemp, Warning, TEXT("%i"), i);
 		}
 	}
 	// generate mesh
@@ -92,4 +91,5 @@ void AGeneratedAsteroidMesh3::GenerateMesh()
 
 	// Apply material
 	Mesh->SetMaterial(0, Material);
+
 }

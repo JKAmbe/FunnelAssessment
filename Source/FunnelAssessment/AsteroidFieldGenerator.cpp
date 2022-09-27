@@ -66,7 +66,7 @@ void AAsteroidFieldGenerator::SpawnAsteroidField()
 		for (int x = 0; x < AsteroidFieldX; x++)
 		{
 			// For each point, get the noise and calculate how much asteroid it should spawn 
-			int SpawnAmt = FMath::Lerp(1, MaxAsteroidPerPoint, FMath::PerlinNoise2D(FVector2D(x * PerlinRoughness + PerlinOffset, y * PerlinRoughness + PerlinOffset)));
+			int SpawnAmt = FMath::Lerp(1, AsteroidDensity, FMath::PerlinNoise2D(FVector2D(x * PerlinRoughness + PerlinOffset, y * PerlinRoughness + PerlinOffset)));
 			float PointMaxHeight = SpaceBetween * SpawnAmt;
 			float BaseHeight = (PointMaxHeight / 2) * -1;
 			// Distribute the asteroid equally
