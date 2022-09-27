@@ -46,19 +46,30 @@ void AGeneratedAsteroidMesh3::GenerateMesh()
 	Mesh->ClearAllMeshSections();
 
 	int32 i = 0;
+	float PerlinOffset = FMath::RandRange(-10000.0f, 10000.0f);
+	float PerlinRoughness = FMath::RandRange(0.1f, 1.0f);
+
 	for (int32 Y = 0; Y < Size; Y++)
 	{
-		for (int X = 0; X < Size; X++)
+		for (int32 X = 0; X < Size; X++)
 		{
 			// how much the current X and Y position is at relative to the size of cube
 			FVector2D percent = FVector2D(X, Y) / (Size - 1);
 			// add vertex
 			//FVector VertexPoint = FVector((percent.X - 0.5f) * 2 * LocalA.X, (percent.Y - 0.5f) * 2 * LocalB.Y, LocalUp.Z);
 			//Vertices.Add(FVector(X * Size, Y * Size, 1));
-			FVector VertexPoint = (LocalUp + (percent.X - .5f) * 2 * LocalA + (percent.Y - .5f) * 2 * LocalB) * Size * BaseTriangleSize;
+			FVector VertexPoint = (LocalUp + (percent.X - .5f) * 2 * LocalA + (percent.Y - .5f) * 2 * LocalB);
+			VertexPoint.Normalize();
+			VertexPoint *= Size * BaseTriangleSize;
 			// use noise to offset the vertex point
+			// make it look more asteroidy
+			FVector AVertexPoint = VertexPoint;
+			// Chunky round asteroids
+			AVertexPoint.Z = VertexPoint.Z + VertexPoint.Z * (FMath::PerlinNoise3D(FVector(X * PerlinRoughness + PerlinOffset, Y * PerlinRoughness + PerlinOffset, VertexPoint.Z * PerlinRoughness + PerlinOffset)));
+			AVertexPoint.Y = VertexPoint.Y + VertexPoint.Y * (FMath::PerlinNoise3D(FVector(X * PerlinRoughness + PerlinOffset, VertexPoint.Y * PerlinRoughness + PerlinOffset, VertexPoint.Z * PerlinRoughness + PerlinOffset)));
+			AVertexPoint.X = VertexPoint.X + VertexPoint.X * (FMath::PerlinNoise3D(FVector(VertexPoint.X * PerlinRoughness + PerlinOffset, Y * PerlinRoughness + PerlinOffset, VertexPoint.Z * PerlinRoughness + PerlinOffset)));
 
-			Vertices.Add(VertexPoint);
+			Vertices.Add(AVertexPoint);
 			// add UV coordinates
 			UVCoords.Add(FVector2D(X, Y));
 			// add triangles
