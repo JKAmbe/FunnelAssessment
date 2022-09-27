@@ -23,8 +23,7 @@ protected:
 
 public:
 	UProceduralMeshComponent* Mesh;
-	UPROPERTY(EditAnywhere)
-		int32 Size;
+	int32 Size;
 	FVector LocalUp;
 	FVector LocalA;
 	FVector LocalB;

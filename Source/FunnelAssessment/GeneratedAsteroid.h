@@ -23,19 +23,11 @@ protected:
 
 public:
 	USceneComponent* LocationComponent;
-	//UPROPERTY(VisibleAnywhere)
-	//	TArray<UProceduralMeshComponent*> PCGMeshes;
-	//UPROPERTY(VisibleAnywhere)
-	//	TArray<UGeneratedAsteroidMesh2*> GeneratedAsteroidMeshes;
-	//UPROPERTY(VisibleAnywhere)
-	//	TArray<UGeneratedAsteroidMesh2*> GeneratedAsteroidMeshe
+
 	UPROPERTY(BlueprintReadWrite)
 		int32 Size = 6;
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	void GenerateAsteroidMesh();
-
 };

@@ -23,7 +23,6 @@ void AGeneratedAsteroidMesh3::BeginPlay()
 void AGeneratedAsteroidMesh3::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void AGeneratedAsteroidMesh3::SetupMesh(int32 newSize, FVector newUpDir)
@@ -34,7 +33,6 @@ void AGeneratedAsteroidMesh3::SetupMesh(int32 newSize, FVector newUpDir)
 	this->LocalA = FVector(LocalUp.Y, LocalUp.Z, LocalUp.X);
 	this->LocalB = LocalUp.CrossProduct(LocalUp, LocalA);
 	UE_LOG(LogTemp, Warning, TEXT("Hi %i"), Size);
-
 	GenerateMesh();
 }
 
