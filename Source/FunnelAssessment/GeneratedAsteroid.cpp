@@ -23,3 +23,8 @@ void AGeneratedAsteroid::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
+
+int32 AGeneratedAsteroid::RandomSize(int newSize)
+{
+	return Size = FMath::RandRange(BaseSize, MaxSize);
+}

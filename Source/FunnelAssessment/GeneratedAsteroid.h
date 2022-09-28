@@ -25,9 +25,15 @@ public:
 	UStaticMeshComponent* RootComponent;
 
 	UPROPERTY(BlueprintReadWrite)
+		int32 BaseSize = 6;
+	UPROPERTY(BlueprintReadWrite)
+		int32 MaxSize = 10;
+	UPROPERTY(BlueprintReadWrite)
 		int32 Size = 6;
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	UFUNCTION(BlueprintCallable)
+		int32 RandomSize(int newSize);
 };

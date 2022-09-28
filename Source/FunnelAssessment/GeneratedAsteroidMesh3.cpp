@@ -47,7 +47,6 @@ void AGeneratedAsteroidMesh3::GenerateMesh()
 
 	int32 i = 0;
 	float PerlinOffset = FMath::RandRange(-10000.0f, 10000.0f);
-	float PerlinRoughness = FMath::RandRange(0.1f, 1.0f);
 
 	for (int32 Y = 0; Y < Size; Y++)
 	{
@@ -60,14 +59,26 @@ void AGeneratedAsteroidMesh3::GenerateMesh()
 			//Vertices.Add(FVector(X * Size, Y * Size, 1));
 			FVector VertexPoint = (LocalUp + (percent.X - .5f) * 2 * LocalA + (percent.Y - .5f) * 2 * LocalB);
 			VertexPoint.Normalize();
+			// upscale verterx 
 			VertexPoint *= Size * BaseTriangleSize;
-			// use noise to offset the vertex point
-			// make it look more asteroidy
+			// if the vertex is not at the edge, make it look chunky
 			FVector AVertexPoint = VertexPoint;
-			// Chunky round asteroids
-			AVertexPoint.Z = VertexPoint.Z + VertexPoint.Z * (FMath::PerlinNoise3D(FVector(X * PerlinRoughness + PerlinOffset, Y * PerlinRoughness + PerlinOffset, VertexPoint.Z * PerlinRoughness + PerlinOffset)));
-			AVertexPoint.Y = VertexPoint.Y + VertexPoint.Y * (FMath::PerlinNoise3D(FVector(X * PerlinRoughness + PerlinOffset, VertexPoint.Y * PerlinRoughness + PerlinOffset, VertexPoint.Z * PerlinRoughness + PerlinOffset)));
-			AVertexPoint.X = VertexPoint.X + VertexPoint.X * (FMath::PerlinNoise3D(FVector(VertexPoint.X * PerlinRoughness + PerlinOffset, Y * PerlinRoughness + PerlinOffset, VertexPoint.Z * PerlinRoughness + PerlinOffset)));
+			if (!(X+1 == Size || X == 0) || !(Y+1 == Size || Y == Size))
+			{			
+				// use noise to offset the vertex point
+				// make it look more asteroidy
+				// Chunky round asteroids
+				float PerlinRoughness = FMath::RandRange(0.001f, 0.05f);
+				AVertexPoint.Z = VertexPoint.Z + VertexPoint.Z * (FMath::PerlinNoise3D(FVector(X * PerlinRoughness + PerlinOffset, Y * PerlinRoughness + PerlinOffset, VertexPoint.Z * PerlinRoughness + PerlinOffset)));
+				AVertexPoint.Y = VertexPoint.Y + VertexPoint.Y * (FMath::PerlinNoise3D(FVector(X * PerlinRoughness + PerlinOffset, VertexPoint.Y * PerlinRoughness + PerlinOffset, VertexPoint.Z * PerlinRoughness + PerlinOffset)));
+				AVertexPoint.X = VertexPoint.X + VertexPoint.X * (FMath::PerlinNoise3D(FVector(VertexPoint.X * PerlinRoughness + PerlinOffset, Y * PerlinRoughness + PerlinOffset, VertexPoint.Z * PerlinRoughness + PerlinOffset)));
+			}
+			// if not set to normal
+			else
+			{
+				AVertexPoint = VertexPoint;
+			}
+
 
 			Vertices.Add(AVertexPoint);
 			// add UV coordinates
