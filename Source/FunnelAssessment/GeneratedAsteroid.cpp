@@ -28,3 +28,8 @@ int32 AGeneratedAsteroid::RandomSize(int newSize)
 {
 	return Size = FMath::RandRange(BaseSize, MaxSize);
 }
+
+void AGeneratedAsteroid::RandomScale()
+{
+	this->SetActorScale3D(FVector(FMath::RandRange(1, 1 + Size / MaxSize), FMath::RandRange(1, 1 + Size / MaxSize), FMath::RandRange(1, 1 + Size / MaxSize)));
+}

@@ -31,9 +31,6 @@ public:
 	UPROPERTY(EditAnywhere)
 		bool GenerateNewField = false;
 
-	UPROPERTY(EditAnywhere, Category = "Per Asteroid Setting", meta = (ClampMin = "1.0", ClampMax = "5.0"))
-		float AsteroidScaleRandomness = 1.0;
-
 	UPROPERTY(EditAnywhere, Category="Asteroid Field Generation Setting")
 		int32 AsteroidFieldX = 10;
 	UPROPERTY(EditAnywhere, Category = "Asteroid Field Generation Setting")

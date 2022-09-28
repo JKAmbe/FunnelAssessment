@@ -36,4 +36,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	UFUNCTION(BlueprintCallable)
 		int32 RandomSize(int newSize);
+	UFUNCTION(BlueprintCallable)
+		void RandomScale();
 };
