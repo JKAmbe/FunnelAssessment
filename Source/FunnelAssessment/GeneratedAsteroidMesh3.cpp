@@ -32,7 +32,6 @@ void AGeneratedAsteroidMesh3::SetupMesh(int32 newSize, FVector newUpDir, UMateri
 	this->LocalUp = newUpDir;
 	this->LocalA = FVector(LocalUp.Y, LocalUp.Z, LocalUp.X);
 	this->LocalB = LocalUp.CrossProduct(LocalUp, LocalA);
-	UE_LOG(LogTemp, Warning, TEXT("Hi %i"), Size);
 	Material = newMaterial;
 	GenerateMesh();
 }

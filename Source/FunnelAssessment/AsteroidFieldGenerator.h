@@ -13,7 +13,8 @@ UENUM()
 enum class EGenerationType : uint8
 {
 	Normal,
-	CenterWeighted
+	CenterWeighted,
+	CenterWeightedSample
 };
 
 UCLASS()

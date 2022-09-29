@@ -62,7 +62,6 @@ void AAsteroidFieldGenerator::SpawnAsteroidField()
 
 	float PerlinOffset = FMath::RandRange(-10000.0f, 10000.0f);
 
-
 	if (GenerationType == EGenerationType::Normal)
 	{
 		for (int y = 0; y < AsteroidFieldY; y++)
@@ -86,21 +85,103 @@ void AAsteroidFieldGenerator::SpawnAsteroidField()
 	}
 	if (GenerationType == EGenerationType::CenterWeighted)
 	{
+		int32 CenterY = AsteroidFieldY / 2 + 1;
+		int32 CenterX = AsteroidFieldX / 2 + 1;
 		for (int y = 0; y < AsteroidFieldY; y++)
 		{
+
 			for (int x = 0; x < AsteroidFieldX; x++)
 			{
-				// for each point, get the noise and calculate how much asteroids it should spawn
-				int SpawnAmt = FMath::Lerp(1, AsteroidDensity, FMath::PerlinNoise2D(FVector2D(x * PerlinRoughness + PerlinOffset, y * PerlinRoughness + PerlinOffset)));
+				float Weight;
+				//float WeightMod;
+				if (x == CenterX)
+				{
+					Weight = 1.0f;
+
+				}
+				else
+				// lower the weight the furter it is away from the center
+				{
+					if (x < CenterX)
+					{
+						Weight = FMath::Lerp(0.0f, 1.0f, (float(x) / (float(CenterX) - 1.0f)));
+					}
+					if (x > CenterX)
+					{
+						Weight = FMath::Lerp(1.0f, 0.0f, ((float(x) - float(CenterX)) / float(CenterX)));
+					}
+				}
+				//if (y == CenterY)
+				//{
+				//	Weight = 1.0;
+				//}
+				//if (y < CenterY)
+				//{
+				//	WeightMod = FMath::Lerp(0.1f, 1.0f, (float(y) / (float(CenterY) - 1.0f)));
+				//	Weight = WeightMod;
+				//}
+				//if (y > CenterY)
+				//{
+				//	WeightMod = FMath::Lerp(1.0f, 0.1f, ((float(y) - float(CenterY)) / float(CenterY)));
+				//	Weight = WeightMod;
+				//}
+				//{
+				//	if (x < CenterX)
+				//	{
+				//		Weight = FMath::Lerp(0.1f, 1.0f, (float(x) / (float(CenterX) - 1.0f)));
+				//		//if (y < CenterY)
+				//		//{
+				//		//	WeightMod = FMath::Lerp(0.1f, 1.0f, (float(y) / (float(CenterY) - 1.0f)));
+				//		//	Weight -= WeightMod;
+				//		//}
+				//		//if (y > CenterY)
+				//		//{
+				//		//	WeightMod = FMath::Lerp(1.0f, 0.1f, ((float(y) - float(CenterY)) / float(CenterY)));
+				//		//	Weight -= WeightMod;
+				//		//}
+				//		//UE_LOG(LogTemp, Error, TEXT("%f %f"), Weight, WeightMod);
+				//	}
+				//}
+				//{
+				//	if (x < CenterX)
+				//	{
+				//		Weight = FMath::Lerp(0.1f, 1.0f, (float(x) / (float(CenterX) - 1.0f)));
+				//		if (y < CenterY)
+				//		{
+				//			WeightMod = FMath::Lerp(0.1f, 1.0f, (float(y) / (float(CenterY) - 1.0f)));
+				//			Weight -= WeightMod;
+				//		}
+				//		if (y > CenterY)
+				//		{
+				//			WeightMod = FMath::Lerp(1.0f, 0.1f, ((float(y) - float(CenterY)) / float(CenterY)));
+				//			Weight -= WeightMod;
+				//		}
+				//	}
+				//	if (x > CenterX)
+				//	{
+				//		Weight = FMath::Lerp(1.0f, 0.1f, ((float(x) - float(CenterX)) / float(CenterX)));
+				//		if (y < CenterY)
+				//		{
+				//			WeightMod = FMath::Lerp(0.1f, 1.0f, (float(y) / (float(CenterY) - 1.0f)));
+				//			Weight -= WeightMod;
+				//		}
+				//		if (y > CenterY)
+				//		{
+				//			WeightMod = FMath::Lerp(1.0f, 0.1f, ((float(y) - float(CenterY)) / float(CenterY)));
+				//			Weight -= WeightMod;
+				//		}
+				//	}
+				//}
+
+				// set Spawn amount
+				float SpawnAmt = float(AsteroidDensity) * Weight;
+				// use noise to change the spawnAmt
+				SpawnAmt = FMath::Lerp(0.0f, SpawnAmt, FMath::PerlinNoise2D(FVector2D(x * PerlinRoughness + PerlinOffset, y * PerlinRoughness + PerlinOffset)));
 				float PointMaxHeight = SpaceBetween * SpawnAmt;
 				float BaseHeight = (PointMaxHeight / 2) * -1;
-				// weight the spawn amount depending on how far away it is from the center
-				float Percent = float(AsteroidFieldY * y + x) / float(AsteroidFieldX * AsteroidFieldY);
-				float RateFromCenter = (Percent < 0.5 ? Percent : Percent - 0.5) * 2;
-				int WeightedSpawnAmt = SpawnAmt + (SpawnAmt * FMath::Lerp(-1, 1, RateFromCenter));
 
 				// Spawn the asteroids
-				for (int i = 0; i < WeightedSpawnAmt; i++)
+				for (int i = 0; i < int(SpawnAmt); i++)
 				{
 					// starting from -MaxHeight, set Z as i * SpaceBetween and Spawn a asteroid point
 					float AsteroidPointZ = BaseHeight + (i * SpaceBetween);
