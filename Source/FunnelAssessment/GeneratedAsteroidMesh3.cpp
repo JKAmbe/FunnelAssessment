@@ -63,7 +63,8 @@ void AGeneratedAsteroidMesh3::GenerateMesh()
 			VertexPoint *= Size * BaseTriangleSize;
 			// if the vertex is not at the edge, make it look chunky
 			FVector AVertexPoint = VertexPoint;
-			if (!(X+1 == Size || X == 0) || !(Y+1 == Size || Y == Size))
+			//if (!(X+1 == Size || X == 0) || !(Y+1 == Size || Y == Size))
+			if (!(X == 0 || X + 1 >= Size) || !(Y == 0 || Y+1 >= Size * Y))
 			{			
 				// use noise to offset the vertex point
 				// make it look more asteroidy
