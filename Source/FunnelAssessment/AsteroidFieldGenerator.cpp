@@ -61,21 +61,52 @@ void AAsteroidFieldGenerator::SpawnAsteroidField()
 	// place a asteroid point for each width and height
 
 	float PerlinOffset = FMath::RandRange(-10000.0f, 10000.0f);
-	for (int y = 0; y < AsteroidFieldY; y++)
+
+
+	if (GenerationType == EGenerationType::Normal)
 	{
-		for (int x = 0; x < AsteroidFieldX; x++)
+		for (int y = 0; y < AsteroidFieldY; y++)
 		{
-			// For each point, get the noise and calculate how much asteroid it should spawn 
-			int SpawnAmt = FMath::Lerp(1, AsteroidDensity, FMath::PerlinNoise2D(FVector2D(x * PerlinRoughness + PerlinOffset, y * PerlinRoughness + PerlinOffset)));
-			float PointMaxHeight = SpaceBetween * SpawnAmt;
-			float BaseHeight = (PointMaxHeight / 2) * -1;
-			// Distribute the asteroid equally
-			for (int i = 0; i < SpawnAmt; i++)
+			for (int x = 0; x < AsteroidFieldX; x++)
 			{
-				// starting from -MaxHeight, set Z as i * SpaceBetween and Spawn a asteroid point
-				float AsteroidPointZ = BaseHeight + (i * SpaceBetween);
-				auto newAsteroid = GetWorld()->SpawnActor<AActor>(AsteroidToSpawn, this->GetActorLocation() + FVector(x * SpaceBetween, y * SpaceBetween, AsteroidPointZ), this->GetActorRotation() + FRotator(), FActorSpawnParameters());
-				Asteroids.Add(newAsteroid);
+				// For each point, get the noise and calculate how much asteroid it should spawn 
+				int SpawnAmt = FMath::Lerp(1, AsteroidDensity, FMath::PerlinNoise2D(FVector2D(x * PerlinRoughness + PerlinOffset, y * PerlinRoughness + PerlinOffset)));
+				float PointMaxHeight = SpaceBetween * SpawnAmt;
+				float BaseHeight = (PointMaxHeight / 2) * -1;
+				// Distribute the asteroid equally
+				for (int i = 0; i < SpawnAmt; i++)
+				{
+					// starting from -MaxHeight, set Z as i * SpaceBetween and Spawn a asteroid point
+					float AsteroidPointZ = BaseHeight + (i * SpaceBetween);
+					auto newAsteroid = GetWorld()->SpawnActor<AActor>(AsteroidToSpawn, this->GetActorLocation() + FVector(x * SpaceBetween, y * SpaceBetween, AsteroidPointZ), this->GetActorRotation() + FRotator(), FActorSpawnParameters());
+					Asteroids.Add(newAsteroid);
+				}
+			}
+		}
+	}
+	if (GenerationType == EGenerationType::CenterWeighted)
+	{
+		for (int y = 0; y < AsteroidFieldY; y++)
+		{
+			for (int x = 0; x < AsteroidFieldX; x++)
+			{
+				// for each point, get the noise and calculate how much asteroids it should spawn
+				int SpawnAmt = FMath::Lerp(1, AsteroidDensity, FMath::PerlinNoise2D(FVector2D(x * PerlinRoughness + PerlinOffset, y * PerlinRoughness + PerlinOffset)));
+				float PointMaxHeight = SpaceBetween * SpawnAmt;
+				float BaseHeight = (PointMaxHeight / 2) * -1;
+				// weight the spawn amount depending on how far away it is from the center
+				float Percent = float(AsteroidFieldY * y + x) / float(AsteroidFieldX * AsteroidFieldY);
+				float RateFromCenter = (Percent < 0.5 ? Percent : Percent - 0.5) * 2;
+				int WeightedSpawnAmt = SpawnAmt + (SpawnAmt * FMath::Lerp(-1, 1, RateFromCenter));
+
+				// Spawn the asteroids
+				for (int i = 0; i < WeightedSpawnAmt; i++)
+				{
+					// starting from -MaxHeight, set Z as i * SpaceBetween and Spawn a asteroid point
+					float AsteroidPointZ = BaseHeight + (i * SpaceBetween);
+					auto newAsteroid = GetWorld()->SpawnActor<AActor>(AsteroidToSpawn, this->GetActorLocation() + FVector(x * SpaceBetween, y * SpaceBetween, AsteroidPointZ), this->GetActorRotation() + FRotator(), FActorSpawnParameters());
+					Asteroids.Add(newAsteroid);
+				}
 			}
 		}
 	}

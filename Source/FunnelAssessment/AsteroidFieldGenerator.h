@@ -9,6 +9,13 @@
 #include "AsteroidPoint.h"
 #include "AsteroidFieldGenerator.generated.h"
 
+UENUM()
+enum class EGenerationType : uint8
+{
+	Normal,
+	CenterWeighted
+};
+
 UCLASS()
 class FUNNELASSESSMENT_API AAsteroidFieldGenerator : public AActor
 {
@@ -31,6 +38,8 @@ public:
 	UPROPERTY(EditAnywhere)
 		bool GenerateNewField = false;
 
+	UPROPERTY(EditAnywhere, Category = "Asteroid Field Generation Setting")
+		EGenerationType GenerationType = EGenerationType::Normal;
 	UPROPERTY(EditAnywhere, Category="Asteroid Field Generation Setting")
 		int32 AsteroidFieldX = 10;
 	UPROPERTY(EditAnywhere, Category = "Asteroid Field Generation Setting")
@@ -38,11 +47,9 @@ public:
 	UPROPERTY(EditAnywhere, Category="Asteroid Field Generation Setting")
 		float SpaceBetween = 500.0;
 	UPROPERTY(EditAnywhere, Category = "Asteroid Field Generation Setting")
-		int32 AsteroidDensity = 24;
+		int32 AsteroidDensity = 12;
 	UPROPERTY(EditAnywhere, Category = "Asteroid Field Generation Setting")
-		float PerlinScale;
-	UPROPERTY(EditAnywhere, Category = "Asteroid Field Generation Setting")
-		float PerlinRoughness;
+		float PerlinRoughness = 0.001;
 
 	UPROPERTY(VisibleAnywhere)
 	TArray<AActor*> Asteroids;
