@@ -39,16 +39,6 @@ bool AAsteroidFieldGenerator::ShouldTickIfViewportsOnly() const
 
 void AAsteroidFieldGenerator::ClearAsteroidField()
 {
-	//for (auto i : Asteroids)
-	//{
-	//	i->Destroy();
-	//}
-	//auto ClassName = Asteroids[0]->GetClass()->GetName();
-	//for (TActorIterator<ClassName> It(GetWorld()); It; ++It)
-	//{
-	//	(*It)->Destroy();
-	//}
-	//Asteroids.Empty();
 	for (int32 i = 0; i < Asteroids.Num(); i++)
 	{
 		Asteroids[i]->Destroy();
@@ -62,6 +52,9 @@ void AAsteroidFieldGenerator::SpawnAsteroidField()
 
 	float PerlinOffset = FMath::RandRange(-10000.0f, 10000.0f);
 
+
+	// Normal Generation
+	// Use perlin noise adjust the spawn amount
 	if (GenerationType == EGenerationType::Normal)
 	{
 		for (int y = 0; y < AsteroidFieldY; y++)
@@ -83,6 +76,10 @@ void AAsteroidFieldGenerator::SpawnAsteroidField()
 			}
 		}
 	}
+
+	// Center weighted Generation
+	// Checks the distance between each asteroid and the center of the asteroid field and adjusts the spawn amount
+	// Applies Perlin noise to the amount of asteroid fields after it has calculated the adjusted spawn amount
 	if (GenerationType == EGenerationType::CenterWeighted)
 	{
 		int32 CenterY = AsteroidFieldY / 2 + 1;
@@ -93,11 +90,9 @@ void AAsteroidFieldGenerator::SpawnAsteroidField()
 			for (int x = 0; x < AsteroidFieldX; x++)
 			{
 				float Weight;
-				//float WeightMod;
 				if (x == CenterX)
 				{
 					Weight = 1.0f;
-
 				}
 				else
 				// lower the weight the furter it is away from the center
@@ -111,79 +106,17 @@ void AAsteroidFieldGenerator::SpawnAsteroidField()
 						Weight = FMath::Lerp(1.0f, 0.0f, ((float(x) - float(CenterX)) / float(CenterX)));
 					}
 				}
-				//if (y == CenterY)
-				//{
-				//	Weight = 1.0;
-				//}
-				//if (y < CenterY)
-				//{
-				//	WeightMod = FMath::Lerp(0.1f, 1.0f, (float(y) / (float(CenterY) - 1.0f)));
-				//	Weight = WeightMod;
-				//}
-				//if (y > CenterY)
-				//{
-				//	WeightMod = FMath::Lerp(1.0f, 0.1f, ((float(y) - float(CenterY)) / float(CenterY)));
-				//	Weight = WeightMod;
-				//}
-				//{
-				//	if (x < CenterX)
-				//	{
-				//		Weight = FMath::Lerp(0.1f, 1.0f, (float(x) / (float(CenterX) - 1.0f)));
-				//		//if (y < CenterY)
-				//		//{
-				//		//	WeightMod = FMath::Lerp(0.1f, 1.0f, (float(y) / (float(CenterY) - 1.0f)));
-				//		//	Weight -= WeightMod;
-				//		//}
-				//		//if (y > CenterY)
-				//		//{
-				//		//	WeightMod = FMath::Lerp(1.0f, 0.1f, ((float(y) - float(CenterY)) / float(CenterY)));
-				//		//	Weight -= WeightMod;
-				//		//}
-				//		//UE_LOG(LogTemp, Error, TEXT("%f %f"), Weight, WeightMod);
-				//	}
-				//}
-				//{
-				//	if (x < CenterX)
-				//	{
-				//		Weight = FMath::Lerp(0.1f, 1.0f, (float(x) / (float(CenterX) - 1.0f)));
-				//		if (y < CenterY)
-				//		{
-				//			WeightMod = FMath::Lerp(0.1f, 1.0f, (float(y) / (float(CenterY) - 1.0f)));
-				//			Weight -= WeightMod;
-				//		}
-				//		if (y > CenterY)
-				//		{
-				//			WeightMod = FMath::Lerp(1.0f, 0.1f, ((float(y) - float(CenterY)) / float(CenterY)));
-				//			Weight -= WeightMod;
-				//		}
-				//	}
-				//	if (x > CenterX)
-				//	{
-				//		Weight = FMath::Lerp(1.0f, 0.1f, ((float(x) - float(CenterX)) / float(CenterX)));
-				//		if (y < CenterY)
-				//		{
-				//			WeightMod = FMath::Lerp(0.1f, 1.0f, (float(y) / (float(CenterY) - 1.0f)));
-				//			Weight -= WeightMod;
-				//		}
-				//		if (y > CenterY)
-				//		{
-				//			WeightMod = FMath::Lerp(1.0f, 0.1f, ((float(y) - float(CenterY)) / float(CenterY)));
-				//			Weight -= WeightMod;
-				//		}
-				//	}
-				//}
-
 				// set Spawn amount
 				float SpawnAmt = float(AsteroidDensity) * Weight;
 				// use noise to change the spawnAmt
 				SpawnAmt = FMath::Lerp(0.0f, SpawnAmt, FMath::PerlinNoise2D(FVector2D(x * PerlinRoughness + PerlinOffset, y * PerlinRoughness + PerlinOffset)));
+
+
+				// Do the rest of the asteroid spawning
 				float PointMaxHeight = SpaceBetween * SpawnAmt;
 				float BaseHeight = (PointMaxHeight / 2) * -1;
-
-				// Spawn the asteroids
 				for (int i = 0; i < int(SpawnAmt); i++)
 				{
-					// starting from -MaxHeight, set Z as i * SpaceBetween and Spawn a asteroid point
 					float AsteroidPointZ = BaseHeight + (i * SpaceBetween);
 					auto newAsteroid = GetWorld()->SpawnActor<AActor>(AsteroidToSpawn, this->GetActorLocation() + FVector(x * SpaceBetween, y * SpaceBetween, AsteroidPointZ), this->GetActorRotation() + FRotator(), FActorSpawnParameters());
 					Asteroids.Add(newAsteroid);

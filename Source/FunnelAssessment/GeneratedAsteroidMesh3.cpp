@@ -53,16 +53,12 @@ void AGeneratedAsteroidMesh3::GenerateMesh()
 		{
 			// how much the current X and Y position is at relative to the size of cube
 			FVector2D percent = FVector2D(X, Y) / (Size - 1);
-			// add vertex
-			//FVector VertexPoint = FVector((percent.X - 0.5f) * 2 * LocalA.X, (percent.Y - 0.5f) * 2 * LocalB.Y, LocalUp.Z);
-			//Vertices.Add(FVector(X * Size, Y * Size, 1));
+			// set the position of the vertex and scale it up
 			FVector VertexPoint = (LocalUp + (percent.X - .5f) * 2 * LocalA + (percent.Y - .5f) * 2 * LocalB);
 			VertexPoint.Normalize();
-			// upscale verterx 
 			VertexPoint *= Size * BaseTriangleSize;
 			// if the vertex is not at the edge, make it look chunky
 			FVector AVertexPoint = VertexPoint;
-			//if (!(X+1 == Size || X == 0) || !(Y+1 == Size || Y == Size))
 			if (!(X == 0 || X + 1 >= Size) || !(Y == 0 || Y+1 >= Size * Y))
 			{			
 				// use noise to offset the vertex point
@@ -79,8 +75,9 @@ void AGeneratedAsteroidMesh3::GenerateMesh()
 			{
 				AVertexPoint = VertexPoint;
 			}
-
+			// Add the vertex
 			Vertices.Add(AVertexPoint);
+
 			// add UV coordinates
 			UVCoords.Add(FVector2D(X, Y));
 			// add triangles
