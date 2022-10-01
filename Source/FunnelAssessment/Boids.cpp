@@ -7,7 +7,9 @@
 #include "Math/UnrealMathUtility.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 
 // Sets default values
@@ -36,22 +38,29 @@ void ABoids::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	TArray <ABoids*> LocalBoids;
+	FVector CurrentPosition = GetActorLocation();
 	for (ABoids* boid : AllBoids)
 	{
-		FVector RelativePosition = boid->GetActorLocation() - GetActorLocation();
+		FVector RelativePosition = boid->GetActorLocation() - CurrentPosition;
 		float Angle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(GetActorForwardVector(), RelativePosition.GetSafeNormal())));
 		if (RelativePosition.IsNearlyZero(LocalRadius) && Angle <=30)
 			LocalBoids.Add(boid);
 	}
 	//base boids behaviour, Seperation, Alignement, Cohesion
-	Separation(DeltaTime, LocalBoids, SeperationStrength);
-	Alignment(DeltaTime, LocalBoids, AlignmentStrength);
-	Cohesion(DeltaTime, LocalBoids, CohesionStrength);
+	Separation(DeltaTime, LocalBoids, SeperationStrength, CurrentPosition);
+	Alignment(DeltaTime, LocalBoids, AlignmentStrength, CurrentPosition);
+	Cohesion(DeltaTime, LocalBoids, CohesionStrength, CurrentPosition);
 
 	//Obstacle Avoidance and target follow
 	if (FollowTarget)
-		FlyToTarget(DeltaTime, FollowTarget->GetActorLocation(), FollowStrength);
-	AvoidCollision(DeltaTime, CollisionAvoidanceStrength);
+	{
+		FlyToTarget(DeltaTime, FollowTarget->GetActorLocation(), FollowStrength, CurrentPosition);
+		if ((FollowTarget->GetActorLocation() - CurrentPosition).IsNearlyZero(LocalRadius) && bFireable ==true) {
+			Fire();
+		}
+	}
+		
+	AvoidCollision(DeltaTime, CollisionAvoidanceStrength, CurrentPosition);
 
 	//Move forward, Direction(rotation) is decided by other behaviour
 	MoveForward();
@@ -64,15 +73,15 @@ void ABoids::MoveForward()
 }
 
 
-void ABoids::Separation(float dt, TArray<ABoids*> LocalBoids, float Strength)
+void ABoids::Separation(float dt, TArray<ABoids*> LocalBoids, float Strength, FVector CurrentLocation)
 {
 	for (ABoids* boid : LocalBoids) {
-		FVector oppositeOfBoid = -(boid->GetActorLocation() - GetActorLocation()) + GetActorLocation();
+		FVector oppositeOfBoid = -(boid->GetActorLocation() - CurrentLocation) + CurrentLocation;
 		RotateToDirection(dt, oppositeOfBoid, Strength);
 	}
 }
 
-void ABoids::Alignment(float dt, TArray<ABoids*> LocalBoids, float Strength)
+void ABoids::Alignment(float dt, TArray<ABoids*> LocalBoids, float Strength, FVector CurrentLocation)
 {
 	FVector AverageDirection = FVector(0, 0, 0);
 	for (ABoids* boid : LocalBoids)
@@ -80,34 +89,34 @@ void ABoids::Alignment(float dt, TArray<ABoids*> LocalBoids, float Strength)
 	AverageDirection = AverageDirection / LocalBoids.Num();
 	
 	if (LocalBoids.Num() > 0)
-		RotateToDirection(dt, GetActorLocation() + AverageDirection, Strength);
+		RotateToDirection(dt, CurrentLocation + AverageDirection, Strength);
 		
 }
 
-void ABoids::Cohesion(float dt, TArray<ABoids*> LocalBoids, float Strength)
+void ABoids::Cohesion(float dt, TArray<ABoids*> LocalBoids, float Strength, FVector CurrentLocation)
 {
 	FVector AveragePosition = FVector(0, 0, 0);
 	for (ABoids* boid : LocalBoids)
 		AveragePosition += boid->GetActorLocation();
-	AveragePosition += GetActorLocation();
+	AveragePosition += CurrentLocation;
 	if (LocalBoids.Num() > 0) {
 		AveragePosition = AveragePosition / (LocalBoids.Num()+1);
 		RotateToDirection(dt, AveragePosition, Strength);
 	}
 }
 
-void ABoids::FlyToTarget(float dt, FVector target, float Strength)
+void ABoids::FlyToTarget(float dt, FVector target, float Strength, FVector CurrentLocation)
 {
 	RotateToDirection(dt,  target, Strength);
 }
 
-void ABoids::AvoidCollision(float dt, float Strength)
+void ABoids::AvoidCollision(float dt, float Strength, FVector CurrentLocation)
 {
 	FHitResult OutHit;
 	FCollisionQueryParams TraceParams;
 	FCollisionObjectQueryParams ObjectParams;
 	ObjectParams.AddObjectTypesToQuery(ECollisionChannel::ECC_WorldDynamic);
-	if (GetWorld()->LineTraceSingleByObjectType(OutHit, GetActorLocation(), (GetActorLocation() + GetActorForwardVector() * AvoidanceDistanceRange), ObjectParams, TraceParams))
+	if (GetWorld()->LineTraceSingleByObjectType(OutHit, CurrentLocation, (CurrentLocation + GetActorForwardVector() * AvoidanceDistanceRange), ObjectParams, TraceParams))
 	{
 		//TSphericalFibonacci<float> PointGen(NumPoints);
 		//UE_LOG(LogTemp, Warning, TEXT ("Collision Emminent With %s"), *(OutHit.GetActor()->GetName()))
@@ -127,8 +136,8 @@ void ABoids::AvoidCollision(float dt, float Strength)
 			float y = FMath::Sin(inclination) * FMath::Sin(azimuth);
 			float z = FMath::Cos(inclination);
 			FVector PointPosition = FVector(-z, y, x);
-			FVector RelativePosition = GetActorLocation() + (-GetActorForwardVector()).Rotation().RotateVector(PointPosition) * AvoidanceDistanceRange;
-			if (!GetWorld()->LineTraceSingleByObjectType(OutHit, GetActorLocation(), RelativePosition, ObjectParams, TraceParams))
+			FVector RelativePosition = CurrentLocation + (-GetActorForwardVector()).Rotation().RotateVector(PointPosition) * AvoidanceDistanceRange;
+			if (!GetWorld()->LineTraceSingleByObjectType(OutHit, CurrentLocation, RelativePosition, ObjectParams, TraceParams))
 			{
 				RotateToDirection(dt, RelativePosition, Strength);
 				break;
@@ -138,6 +147,49 @@ void ABoids::AvoidCollision(float dt, float Strength)
 	}
 	
 }
+
+//void ABoids::FireSequence(FVector CurrentLocation, FVector target)
+//{
+//	bFireable = false;
+//	float	FSTEMP = FollowStrength,
+//			SSTEMP = SeperationStrength,
+//			CSTEMP = CohesionStrength,
+//			ASTEMP = AlignmentStrength,
+//			CASTEMP = CollisionAvoidanceStrength;
+//	FollowStrength = 1.0f;
+//	SeperationStrength = 1.0f;
+//	CohesionStrength = 1.0f;
+//	AlignmentStrength = 1.0f;
+//	CollisionAvoidanceStrength = 1.0f;
+//	UCharacterMovementComponent* Movement = GetCharacterMovement();
+//	Movement->StopMovementImmediately();
+//	float tmpMaxSpeed = Movement->MaxFlySpeed;
+//	//UE_LOG(LogTemp, Warning, TEXT("%f"), tmpMaxSpeed)
+//	Movement->MaxFlySpeed = 0;
+//	SetActorRotation(UKismetMathLibrary::FindLookAtRotation(CurrentLocation, target));
+//	//UGameplayStatics::PlaySoundAtLocation(this,BeamSound,CurrentLocation);
+//	UGameplayStatics::PlaySoundAtLocation(this, BeamSound, CurrentLocation);
+//	BeamParticle->SetVisibility(true);
+//	FTimerHandle TimerHandle;
+//	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()
+//		{
+//			Movement->MaxFlySpeed = 10000;
+//			this->FollowStrength = FSTEMP;
+//			this->SeperationStrength = SSTEMP;
+//			this->CohesionStrength = CSTEMP;
+//			this->AlignmentStrength = ASTEMP;
+//			this->CollisionAvoidanceStrength = CASTEMP;
+//			this->BeamParticle->SetBeamTargetPoint(0, target, 0);
+//			this->BeamParticle->SetVisibility(false);
+//			FTimerHandle TimerHandle2;
+//			GetWorld()->GetTimerManager().SetTimer(TimerHandle2, this, [&]()
+//				{
+//					UE_LOG(LogTemp, Warning, TEXT("TEST"))
+//					bFireable = true;
+//				}, 10.0f);
+//		}, 1.0f, false);
+//	
+//}
 
 void ABoids::RotateToDirection(float dt, FVector target, float Strength)
 {

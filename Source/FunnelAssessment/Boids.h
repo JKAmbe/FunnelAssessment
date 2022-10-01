@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "EngineUtils.h"
+#include "Particles/ParticleSystemComponent.h"
 #include "Boids.generated.h"
 
 UCLASS()
@@ -24,32 +25,41 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	void MoveForward();
-	void Separation(float dt, TArray<ABoids*> LocalBoids, float Strength);
-	void Alignment(float dt, TArray<ABoids*> LocalBoids, float Strength);
-	void Cohesion(float dt, TArray<ABoids*> LocalBoids, float Strength);
-	void FlyToTarget(float dt, FVector target, float Strength);
-	void AvoidCollision(float dt, float Strength);
+	void Separation(float dt, TArray<ABoids*> LocalBoids, float Strength, FVector CurrentLocation);
+	void Alignment(float dt, TArray<ABoids*> LocalBoids, float Strength, FVector CurrentLocation);
+	void Cohesion(float dt, TArray<ABoids*> LocalBoids, float Strength, FVector CurrentLocation);
+	void FlyToTarget(float dt, FVector target, float Strength, FVector CurrentLocation);
+	void AvoidCollision(float dt, float Strength, FVector CurrentLocation);
 	UPROPERTY(EditAnywhere)
 		float LocalRadius;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		USoundBase* BeamSound;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		AActor* FollowTarget;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		bool bFireable;
 	UPROPERTY(EditAnywhere, meta = (UIMin = 0.0f, UIMax = 180.0f, NoSpinbox = false))
 		float MaxAngle;
-
-	UPROPERTY(EditAnywhere, meta=( UIMin = 1.0f, UIMax = 200.0f, ClampMin = 1.0f,NoSpinbox = false))
+	UPROPERTY(EditAnywhere, meta = (UIMin = 0.0f, UIMax = 5.0f, NoSpinbox = false))
+		float UntilNextFire;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=( UIMin = 1.0f, UIMax = 200.0f, ClampMin = 1.0f,NoSpinbox = false))
 		float SeperationStrength;
-	UPROPERTY(EditAnywhere, meta = (UIMin = 1.0f, UIMax = 200.0f, ClampMin = 1.0f, NoSpinbox = false))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (UIMin = 1.0f, UIMax = 200.0f, ClampMin = 1.0f, NoSpinbox = false))
 		float AlignmentStrength;
-	UPROPERTY(EditAnywhere, meta = (UIMin = 1.0f, UIMax = 200.0f, ClampMin = 1.0f, NoSpinbox = false))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,  meta = (UIMin = 1.0f, UIMax = 200.0f, ClampMin = 1.0f, NoSpinbox = false))
 		float CohesionStrength;
-
-	UPROPERTY(EditAnywhere, meta = (UIMin = 0.0f, UIMax = 5.0f, NoSpinbox = false))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (UIMin = 0.0f, UIMax = 5.0f, NoSpinbox = false))
 		float FollowStrength;
-	UPROPERTY(EditAnywhere, meta = (UIMin = 0.0f, UIMax = 5.0f, NoSpinbox = false))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (UIMin = 0.0f, UIMax = 5.0f, NoSpinbox = false))
 		float CollisionAvoidanceStrength;
 	UPROPERTY(EditAnywhere, meta = (UIMin = 0.0f, UIMax = 1000.0f, NoSpinbox = false))
 		float AvoidanceDistanceRange;
+	UFUNCTION(BlueprintImplementableEvent)
+		void Fire();
 	void RotateToDirection(float dt, FVector direction, float Strength);
 	void GetAllBoids();
+	void FireSequence(FVector CurrentLocation, FVector target);
 	TArray<ABoids*> AllBoids;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+		UParticleSystemComponent* BeamParticle;
 };
