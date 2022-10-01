@@ -16,7 +16,7 @@ class FUNNELASSESSMENT_API ABoids : public ACharacter
 public:	
 	// Sets default values for this actor's properties
 	ABoids();
-
+	float MaxFlySpeedTMP;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -42,6 +42,7 @@ public:
 		float MaxAngle;
 	UPROPERTY(EditAnywhere, meta = (UIMin = 0.0f, UIMax = 5.0f, NoSpinbox = false))
 		float UntilNextFire;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=( UIMin = 1.0f, UIMax = 200.0f, ClampMin = 1.0f,NoSpinbox = false))
 		float SeperationStrength;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (UIMin = 1.0f, UIMax = 200.0f, ClampMin = 1.0f, NoSpinbox = false))
@@ -54,8 +55,6 @@ public:
 		float CollisionAvoidanceStrength;
 	UPROPERTY(EditAnywhere, meta = (UIMin = 0.0f, UIMax = 1000.0f, NoSpinbox = false))
 		float AvoidanceDistanceRange;
-	UFUNCTION(BlueprintImplementableEvent)
-		void Fire();
 	void RotateToDirection(float dt, FVector direction, float Strength);
 	void GetAllBoids();
 	void FireSequence(FVector CurrentLocation, FVector target);

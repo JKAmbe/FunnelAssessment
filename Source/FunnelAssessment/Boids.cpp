@@ -31,6 +31,7 @@ void ABoids::BeginPlay()
 {
 	Super::BeginPlay();
 	GetAllBoids();
+	MaxFlySpeedTMP = GetCharacterMovement()->MaxFlySpeed;
 }
 
 // Called every frame
@@ -47,23 +48,24 @@ void ABoids::Tick(float DeltaTime)
 			LocalBoids.Add(boid);
 	}
 	//base boids behaviour, Seperation, Alignement, Cohesion
-	Separation(DeltaTime, LocalBoids, SeperationStrength, CurrentPosition);
-	Alignment(DeltaTime, LocalBoids, AlignmentStrength, CurrentPosition);
-	Cohesion(DeltaTime, LocalBoids, CohesionStrength, CurrentPosition);
+	Separation(DeltaTime, LocalBoids, bFireable? SeperationStrength : 1.0f, CurrentPosition);
+	Alignment(DeltaTime, LocalBoids, bFireable ? AlignmentStrength : 1.0f, CurrentPosition);
+	Cohesion(DeltaTime, LocalBoids, bFireable ? CohesionStrength : 1.0f, CurrentPosition);
 
 	//Obstacle Avoidance and target follow
 	if (FollowTarget)
 	{
-		FlyToTarget(DeltaTime, FollowTarget->GetActorLocation(), FollowStrength, CurrentPosition);
-		if ((FollowTarget->GetActorLocation() - CurrentPosition).IsNearlyZero(LocalRadius) && bFireable ==true) {
-			Fire();
+		FlyToTarget(DeltaTime, FollowTarget->GetActorLocation(), bFireable ? FollowStrength:1.0f, CurrentPosition);
+		if ((FollowTarget->GetActorLocation() - CurrentPosition).IsNearlyZero(LocalRadius) && bFireable == true) {
+			FireSequence(CurrentPosition, FollowTarget->GetActorLocation());
 		}
 	}
 		
-	AvoidCollision(DeltaTime, CollisionAvoidanceStrength, CurrentPosition);
+	AvoidCollision(DeltaTime, bFireable ? CollisionAvoidanceStrength : 1.0f, CurrentPosition);
 
 	//Move forward, Direction(rotation) is decided by other behaviour
 	MoveForward();
+	//UE_LOG(LogTemp,Warning, TEXT("%f"), (float)bFireable)
 }
 
 void ABoids::MoveForward()
@@ -148,48 +150,29 @@ void ABoids::AvoidCollision(float dt, float Strength, FVector CurrentLocation)
 	
 }
 
-//void ABoids::FireSequence(FVector CurrentLocation, FVector target)
-//{
-//	bFireable = false;
-//	float	FSTEMP = FollowStrength,
-//			SSTEMP = SeperationStrength,
-//			CSTEMP = CohesionStrength,
-//			ASTEMP = AlignmentStrength,
-//			CASTEMP = CollisionAvoidanceStrength;
-//	FollowStrength = 1.0f;
-//	SeperationStrength = 1.0f;
-//	CohesionStrength = 1.0f;
-//	AlignmentStrength = 1.0f;
-//	CollisionAvoidanceStrength = 1.0f;
-//	UCharacterMovementComponent* Movement = GetCharacterMovement();
-//	Movement->StopMovementImmediately();
-//	float tmpMaxSpeed = Movement->MaxFlySpeed;
-//	//UE_LOG(LogTemp, Warning, TEXT("%f"), tmpMaxSpeed)
-//	Movement->MaxFlySpeed = 0;
-//	SetActorRotation(UKismetMathLibrary::FindLookAtRotation(CurrentLocation, target));
-//	//UGameplayStatics::PlaySoundAtLocation(this,BeamSound,CurrentLocation);
-//	UGameplayStatics::PlaySoundAtLocation(this, BeamSound, CurrentLocation);
-//	BeamParticle->SetVisibility(true);
-//	FTimerHandle TimerHandle;
-//	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()
-//		{
-//			Movement->MaxFlySpeed = 10000;
-//			this->FollowStrength = FSTEMP;
-//			this->SeperationStrength = SSTEMP;
-//			this->CohesionStrength = CSTEMP;
-//			this->AlignmentStrength = ASTEMP;
-//			this->CollisionAvoidanceStrength = CASTEMP;
-//			this->BeamParticle->SetBeamTargetPoint(0, target, 0);
-//			this->BeamParticle->SetVisibility(false);
-//			FTimerHandle TimerHandle2;
-//			GetWorld()->GetTimerManager().SetTimer(TimerHandle2, this, [&]()
-//				{
-//					UE_LOG(LogTemp, Warning, TEXT("TEST"))
-//					bFireable = true;
-//				}, 10.0f);
-//		}, 1.0f, false);
-//	
-//}
+void ABoids::FireSequence(FVector CurrentLocation, FVector target)
+{
+	bFireable = false;
+	UCharacterMovementComponent* Movement = GetCharacterMovement();
+	Movement->StopMovementImmediately();
+	Movement->MaxFlySpeed = 0;
+	SetActorRotation(UKismetMathLibrary::FindLookAtRotation(CurrentLocation, target));
+	UGameplayStatics::PlaySoundAtLocation(this, BeamSound, CurrentLocation);
+	BeamParticle->SetBeamTargetPoint(0, target, 0);
+	BeamParticle->SetVisibility(true);
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()
+		{
+			GetCharacterMovement()->MaxFlySpeed = MaxFlySpeedTMP;
+			BeamParticle->SetVisibility(false);
+			FTimerHandle TimerHandle2;
+			GetWorld()->GetTimerManager().SetTimer(TimerHandle2, [&]()
+				{
+					bFireable = true;
+				}, UntilNextFire, false);
+		}, 0.1f, false);
+	
+}
 
 void ABoids::RotateToDirection(float dt, FVector target, float Strength)
 {
