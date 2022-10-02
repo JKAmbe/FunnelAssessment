@@ -64,7 +64,6 @@ void AGeneratedAsteroidMesh3::GenerateMesh()
 				// use noise to offset the vertex point
 				// make it look more asteroidy
 				// Chunky round asteroids
-				//float PerlinRoughness = FMath::RandRange(0.05, 0.6f);
 				float PerlinRoughness = 0.05;
 				AVertexPoint.Z = VertexPoint.Z + VertexPoint.Z * (FMath::PerlinNoise3D(FVector(X * PerlinRoughness + PerlinOffset, Y * PerlinRoughness + PerlinOffset, VertexPoint.Z * PerlinRoughness + PerlinOffset)));
 				AVertexPoint.Y = VertexPoint.Y + VertexPoint.Y * (FMath::PerlinNoise3D(FVector(X * PerlinRoughness + PerlinOffset, VertexPoint.Y * PerlinRoughness + PerlinOffset, VertexPoint.Z * PerlinRoughness + PerlinOffset)));

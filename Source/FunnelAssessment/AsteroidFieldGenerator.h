@@ -14,7 +14,6 @@ enum class EGenerationType : uint8
 {
 	Normal,
 	CenterWeighted,
-	CenterWeightedSample
 };
 
 UCLASS()

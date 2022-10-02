@@ -99,11 +99,11 @@ void AAsteroidFieldGenerator::SpawnAsteroidField()
 				{
 					if (x < CenterX)
 					{
-						Weight = FMath::Lerp(0.0f, 1.0f, (float(x) / (float(CenterX) - 1.0f)));
+						Weight = FMath::Lerp(0.2f, 1.0f, (float(x) / (float(CenterX) - 1.0f)));
 					}
 					if (x > CenterX)
 					{
-						Weight = FMath::Lerp(1.0f, 0.0f, ((float(x) - float(CenterX)) / float(CenterX)));
+						Weight = FMath::Lerp(1.0f, 0.2f, ((float(x) - float(CenterX)) / float(CenterX)));
 					}
 				}
 				// set Spawn amount
