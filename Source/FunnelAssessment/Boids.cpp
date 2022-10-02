@@ -18,7 +18,6 @@ ABoids::ABoids()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	LocalRadius = 1000.0f;
-	MaxAngle = 30.0f;
 	SeperationStrength = 1.0f;
 	AlignmentStrength = 5.0f;
 	CohesionStrength = 5.0f;

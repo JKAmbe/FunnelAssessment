@@ -38,8 +38,6 @@ public:
 		AActor* FollowTarget;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		bool bFireable;
-	UPROPERTY(EditAnywhere, meta = (UIMin = 0.0f, UIMax = 180.0f, NoSpinbox = false))
-		float MaxAngle;
 	UPROPERTY(EditAnywhere, meta = (UIMin = 0.0f, UIMax = 5.0f, NoSpinbox = false))
 		float UntilNextFire;
 	
@@ -59,6 +57,6 @@ public:
 	void GetAllBoids();
 	void FireSequence(FVector CurrentLocation, FVector target);
 	TArray<ABoids*> AllBoids;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite)
 		UParticleSystemComponent* BeamParticle;
 };
