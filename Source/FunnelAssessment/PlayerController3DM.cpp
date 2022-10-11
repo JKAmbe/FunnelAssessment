@@ -19,6 +19,8 @@ void APlayerController3DM::BeginPlay()
 	
 	Camera = FindComponentByClass<UCameraComponent>();
 	MoveComponent = GetCharacterMovement();
+	// set move mode as flying
+	MoveComponent->SetMovementMode(EMovementMode::MOVE_Flying);
 }
 
 // Called every frame
@@ -66,6 +68,24 @@ void APlayerController3DM::LookX(float val)
 
 void APlayerController3DM::LookY(float val)
 {
-	AddControllerPitchInput(val);
+	AddControllerPitchInput(-val);
+	//FRotator LookY = FRotator::ZeroRotator;
+	//LookY.Pitch = val;
+	//if (Camera)
+	//{
+	//	if (abs(Camera->GetRelativeRotation().Pitch + LookY.Pitch >= 90.0f))
+	//	{
+	//		return;
+	//	}
+	//	Camera->AddRelativeRotation(LookY);
+	//	FRotator RelativeRotation = Camera->GetRelativeRotation();
+	//	RelativeRotation.Yaw = 0.0f;
+	//	RelativeRotation.Roll = 0.0f;
+	//	Camera->SetRelativeRotation(RelativeRotation);
+	//}
+	if (Camera)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Hi"));
+	}
 }
 
