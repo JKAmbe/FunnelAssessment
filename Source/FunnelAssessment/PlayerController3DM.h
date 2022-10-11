@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Camera/CameraComponent.h"
 #include "PlayerController3DM.generated.h"
 
 UCLASS()
@@ -26,4 +27,15 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+public:
+	// Movement functions
+	void MoveForward(float val);
+	void Strafe(float val);
+	void MoveVertical(float val);
+	void LookX(float val);
+	void LookY(float val);
+
+private:
+	UCameraComponent* Camera;
+	UCharacterMovementComponent* MoveComponent;
 };
