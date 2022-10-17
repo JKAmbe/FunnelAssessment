@@ -35,8 +35,25 @@ public:
 	void MoveVertical(float val);
 	void LookX(float val);
 	void LookY(float val);
+	void BoostCheck();
+	void BoostOn();
+	void BoostOff();
+
+public:
+	UPROPERTY(EditAnywhere)
+		float FlySpeed = 1000.0f;
+	UPROPERTY(EditAnywhere)
+		float FlyDeceleration = 2000.0f;
+	UPROPERTY(EditAnywhere)
+		float BoostMultiplier = 2.0f;
+	UPROPERTY(EditAnywhere)
+		float MaxBoostDuration = 2.0f;
 
 private:
 	UCameraComponent* Camera;
 	UCharacterMovementComponent* MoveComponent;
+
+	bool bBoostActive = false;
+	float BoostTime = 0.0f;
+	float BoostCooldown = 1.0f;
 };

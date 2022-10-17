@@ -18,15 +18,22 @@ void APlayerController3DM::BeginPlay()
 	Super::BeginPlay();
 	
 	Camera = FindComponentByClass<UCameraComponent>();
+	bUseControllerRotationPitch = true;
+
 	MoveComponent = GetCharacterMovement();
 	// set move mode as flying
 	MoveComponent->SetMovementMode(EMovementMode::MOVE_Flying);
+	// set move speed from custom vars
+	MoveComponent->MaxFlySpeed = FlySpeed;
+	MoveComponent->BrakingDecelerationFlying = FlyDeceleration;
 }
 
 // Called every frame
 void APlayerController3DM::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	BoostCheck();
 
 }
 
@@ -40,7 +47,8 @@ void APlayerController3DM::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	PlayerInputComponent->BindAxis(TEXT("LookX"), this, &APlayerController3DM::LookX);
 	PlayerInputComponent->BindAxis(TEXT("LookY"), this, &APlayerController3DM::LookY);
 
-
+	PlayerInputComponent->BindAction(TEXT("Boost"), EInputEvent::IE_Pressed, this, &APlayerController3DM::BoostOn);
+	PlayerInputComponent->BindAction(TEXT("Boost"), EInputEvent::IE_Released, this, &APlayerController3DM::BoostOff);
 }
 
 void APlayerController3DM::MoveForward(float val)
@@ -68,24 +76,66 @@ void APlayerController3DM::LookX(float val)
 
 void APlayerController3DM::LookY(float val)
 {
-	AddControllerPitchInput(-val);
-	//FRotator LookY = FRotator::ZeroRotator;
-	//LookY.Pitch = val;
-	//if (Camera)
-	//{
-	//	if (abs(Camera->GetRelativeRotation().Pitch + LookY.Pitch >= 90.0f))
-	//	{
-	//		return;
-	//	}
-	//	Camera->AddRelativeRotation(LookY);
-	//	FRotator RelativeRotation = Camera->GetRelativeRotation();
-	//	RelativeRotation.Yaw = 0.0f;
-	//	RelativeRotation.Roll = 0.0f;
-	//	Camera->SetRelativeRotation(RelativeRotation);
-	//}
+	FRotator LookUpRotation = FRotator::ZeroRotator;
+	LookUpRotation.Pitch = val;
 	if (Camera)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Hi"));
+		if (abs(Camera->GetRelativeRotation().Pitch + LookUpRotation.Pitch >= 90.0f)) {
+
+			return;
+		}
+		Camera->AddRelativeRotation(LookUpRotation);
+		FRotator RelativeRotation = Camera->GetRelativeRotation();
+		RelativeRotation.Yaw = 0.0f;
+		RelativeRotation.Roll = 0.0f;
+		Camera->SetRelativeRotation(RelativeRotation);
 	}
 }
 
+void APlayerController3DM::BoostCheck()
+{
+	//if (bBoostActive && BoostTime < MaxBoostDuration)
+	//{
+	//	BoostTime += GetWorld()->GetDeltaSeconds();
+	//	MoveComponent->MaxFlySpeed = FlySpeed * BoostMultiplier;
+	//	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("%f"), (BoostTime/MaxBoostDuration)* 100));
+	//}
+	//if (bBoostActive && BoostTime >= MaxBoostDuration)
+	//{
+	//	MoveComponent->MaxFlySpeed = FlySpeed;
+	//	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("No boost fuel")));
+	//}
+
+	// Increase player movement speed if boost is on until the duration is met
+	if (bBoostActive)
+	{
+		if (BoostTime < MaxBoostDuration)
+		{
+			BoostTime += GetWorld()->GetDeltaSeconds();
+			MoveComponent->MaxFlySpeed = FlySpeed * BoostMultiplier;
+			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("%f"), (BoostTime/MaxBoostDuration)* 100));
+		}
+		if (BoostTime >= MaxBoostDuration)
+		{
+			MoveComponent->MaxFlySpeed = FlySpeed;
+			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("No boost fuel")));
+		}
+	}
+	// Cooldown if boost is inactive
+	if (!bBoostActive && BoostTime > 0.0f)
+	{
+		MoveComponent->MaxFlySpeed = FlySpeed;
+		BoostTime -= GetWorld()->GetDeltaSeconds();
+	}
+}
+
+void APlayerController3DM::BoostOn()
+{
+	bBoostActive = true;
+}
+
+void APlayerController3DM::BoostOff()
+{
+	bBoostActive = false;
+}
