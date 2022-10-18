@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Boids.h"
 #include "PlayerController3DM.generated.h"
 
 UCLASS()
@@ -49,6 +50,10 @@ public:
 	UPROPERTY(EditAnywhere)
 		float MaxBoostDuration = 2.0f;
 
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<ABoids> FunnelClass;
+	UPROPERTY(EditAnywhere)
+		TSubclassOf<AActor> Opponent;
 private:
 	UCameraComponent* Camera;
 	UCharacterMovementComponent* MoveComponent;
@@ -57,4 +62,6 @@ private:
 	float bBoostCooldown = false;
 	float BoostTime = 0.0f;
 	float BoostCooldown = 1.0f;
+
+	ABoids Funnels;
 };

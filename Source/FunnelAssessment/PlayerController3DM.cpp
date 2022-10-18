@@ -26,6 +26,12 @@ void APlayerController3DM::BeginPlay()
 	// set move speed from custom vars
 	MoveComponent->MaxFlySpeed = FlySpeed;
 	MoveComponent->BrakingDecelerationFlying = FlyDeceleration;
+
+	if (FunnelClass)
+	{
+		//Funnels = GetWorld()->SpawnActor(FunnelClass, this->GetActorLocation(), FActorSpawnParameters());
+		//Funnels = GetWorld()->SpawnActor<>
+	}
 }
 
 // Called every frame
@@ -109,6 +115,7 @@ void APlayerController3DM::BoostCheck()
 			// disable boost and force cooldown when boost is used up
 			if (BoostTime >= MaxBoostDuration)
 			{
+				BoostTime = 0.0f;
 				MoveComponent->MaxFlySpeed = FlySpeed;
 				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("No boost fuel")));
 				bBoostActive = false;
