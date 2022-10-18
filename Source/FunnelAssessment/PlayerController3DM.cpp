@@ -95,39 +95,42 @@ void APlayerController3DM::LookY(float val)
 
 void APlayerController3DM::BoostCheck()
 {
-	//if (bBoostActive && BoostTime < MaxBoostDuration)
-	//{
-	//	BoostTime += GetWorld()->GetDeltaSeconds();
-	//	MoveComponent->MaxFlySpeed = FlySpeed * BoostMultiplier;
-	//	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("%f"), (BoostTime/MaxBoostDuration)* 100));
-	//}
-	//if (bBoostActive && BoostTime >= MaxBoostDuration)
-	//{
-	//	MoveComponent->MaxFlySpeed = FlySpeed;
-	//	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("No boost fuel")));
-	//}
-
-	// Increase player movement speed if boost is on until the duration is met
-	if (bBoostActive)
+	if (!bBoostCooldown)
 	{
-		if (BoostTime < MaxBoostDuration)
+		// Increase player movement speed if boost is on until the duration is met
+		if (bBoostActive)
 		{
-			BoostTime += GetWorld()->GetDeltaSeconds();
-			MoveComponent->MaxFlySpeed = FlySpeed * BoostMultiplier;
-			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("%f"), (BoostTime/MaxBoostDuration)* 100));
-		}
-		if (BoostTime >= MaxBoostDuration)
-		{
-			MoveComponent->MaxFlySpeed = FlySpeed;
-			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("No boost fuel")));
+			if (BoostTime < MaxBoostDuration)
+			{
+				BoostTime += GetWorld()->GetDeltaSeconds();
+				MoveComponent->MaxFlySpeed = FlySpeed * BoostMultiplier;
+				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("%f"), (BoostTime / MaxBoostDuration) * 100));
+			}
+			// disable boost and force cooldown when boost is used up
+			if (BoostTime >= MaxBoostDuration)
+			{
+				MoveComponent->MaxFlySpeed = FlySpeed;
+				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("No boost fuel")));
+				bBoostActive = false;
+				bBoostCooldown = true;
+			}
 		}
 	}
-	// Cooldown if boost is inactive
+
+	// Regenerate boost if boost is inactive
 	if (!bBoostActive && BoostTime > 0.0f)
 	{
 		MoveComponent->MaxFlySpeed = FlySpeed;
 		BoostTime -= GetWorld()->GetDeltaSeconds();
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("%f"), (BoostTime / MaxBoostDuration) * 100));
+		// allow player to boost again if the boost is fully recovered
+		if (BoostTime <= 0.0f)
+		{
+			BoostTime = 0.0f;
+			bBoostCooldown = false;
+		}
 	}
+
 }
 
 void APlayerController3DM::BoostOn()

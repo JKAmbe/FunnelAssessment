@@ -54,6 +54,7 @@ private:
 	UCharacterMovementComponent* MoveComponent;
 
 	bool bBoostActive = false;
+	float bBoostCooldown = false;
 	float BoostTime = 0.0f;
 	float BoostCooldown = 1.0f;
 };
