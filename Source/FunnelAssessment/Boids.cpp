@@ -9,6 +9,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
+#include "AIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 
@@ -28,9 +29,11 @@ ABoids::ABoids()
 // Called when the game starts or when spawned
 void ABoids::BeginPlay()
 {
+
 	Super::BeginPlay();
 	GetAllBoids();
 	MaxFlySpeedTMP = GetCharacterMovement()->MaxFlySpeed;
+	//UGameplayStatics::GetPlayerController(GetWorld(), 0)->LineOfSightTo(this, FVector(0,0,0), false);
 }
 
 // Called every frame
@@ -47,9 +50,13 @@ void ABoids::Tick(float DeltaTime)
 			LocalBoids.Add(boid);
 	}
 	//base boids behaviour, Seperation, Alignement, Cohesion
-	Separation(DeltaTime, LocalBoids, bFireable? SeperationStrength : 1.0f, CurrentPosition);
+	/*Separation(DeltaTime, LocalBoids, bFireable? SeperationStrength : 1.0f, CurrentPosition);
 	Alignment(DeltaTime, LocalBoids, bFireable ? AlignmentStrength : 1.0f, CurrentPosition);
-	Cohesion(DeltaTime, LocalBoids, bFireable ? CohesionStrength : 1.0f, CurrentPosition);
+	Cohesion(DeltaTime, LocalBoids, bFireable ? CohesionStrength : 1.0f, CurrentPosition);*/
+
+	Separation(DeltaTime, LocalBoids, SeperationStrength, CurrentPosition);
+	Alignment(DeltaTime, LocalBoids, AlignmentStrength, CurrentPosition);
+	Cohesion(DeltaTime, LocalBoids,  CohesionStrength, CurrentPosition);
 
 	//Obstacle Avoidance and target follow
 	if (FollowTarget)
@@ -60,8 +67,8 @@ void ABoids::Tick(float DeltaTime)
 		}
 	}
 		
-	AvoidCollision(DeltaTime, bFireable ? CollisionAvoidanceStrength : 1.0f, CurrentPosition);
-
+	AvoidCollision(DeltaTime, CollisionAvoidanceStrength, CurrentPosition);
+	//AvoidCollision(DeltaTime, bFireable ? CollisionAvoidanceStrength : 1.0f, CurrentPosition);
 	//Move forward, Direction(rotation) is decided by other behaviour
 	MoveForward();
 	//UE_LOG(LogTemp,Warning, TEXT("%f"), (float)bFireable)
