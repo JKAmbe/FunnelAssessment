@@ -31,6 +31,7 @@ void APlayerController3DM::BeginPlay()
 	{
 		//Funnels = GetWorld()->SpawnActor(FunnelClass, this->GetActorLocation(), FActorSpawnParameters());
 		//Funnels = GetWorld()->SpawnActor<>
+		Funnels = GetWorld()->SpawnActor<ABoids>(FunnelClass, this->GetActorLocation(), this->GetActorRotation());
 	}
 }
 

@@ -63,5 +63,5 @@ private:
 	float BoostTime = 0.0f;
 	float BoostCooldown = 1.0f;
 
-	ABoids Funnels;
+	ABoids* Funnels;
 };
