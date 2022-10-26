@@ -27,12 +27,8 @@ void APlayerController3DM::BeginPlay()
 	MoveComponent->MaxFlySpeed = FlySpeed;
 	MoveComponent->BrakingDecelerationFlying = FlyDeceleration;
 
-	if (FunnelClass)
-	{
-		//Funnels = GetWorld()->SpawnActor(FunnelClass, this->GetActorLocation(), FActorSpawnParameters());
-		//Funnels = GetWorld()->SpawnActor<>
-		Funnels = GetWorld()->SpawnActor<ABoids>(FunnelClass, this->GetActorLocation(), this->GetActorRotation());
-	}
+	// Spawns the funnels
+	SpawnFunnels();
 }
 
 // Called every frame
@@ -149,4 +145,27 @@ void APlayerController3DM::BoostOn()
 void APlayerController3DM::BoostOff()
 {
 	bBoostActive = false;
+}
+
+void APlayerController3DM::SpawnFunnels()
+{
+	// Fills the Funnels TArray by spawning the set amount of funnels spaced out in equal length
+	if (FunnelClass)
+	{
+		for (int i = 0; i < FunnelAmt; i++)
+		{
+			FVector root = this->GetActorLocation();
+			// Set the initial spawn location
+			FVector SpawnOffset = root;
+			SpawnOffset.Z += FunnelOffset;
+			SpawnOffset.Y += ((FunnelOffset * FunnelAmt) / -2) + (FunnelOffset * i);
+			ABoids* NewFunnel = GetWorld()->SpawnActor<ABoids>(FunnelClass, SpawnOffset, this->GetActorRotation());
+			Funnels.Add(NewFunnel);
+			// sets the funnel's target
+			if (FunnelTarget)
+			{
+				NewFunnel->FollowTarget = FunnelTarget;
+			}
+		}
+	}
 }

@@ -40,7 +40,12 @@ public:
 	void BoostOn();
 	void BoostOff();
 
+	// Player ability/feature functions
+	void SpawnFunnels();
+
+
 public:
+	// Player movement and boost
 	UPROPERTY(EditAnywhere)
 		float FlySpeed = 1000.0f;
 	UPROPERTY(EditAnywhere)
@@ -50,10 +55,13 @@ public:
 	UPROPERTY(EditAnywhere)
 		float MaxBoostDuration = 2.0f;
 
+	// Set the funnel class, the amount to spawn and the target they should be chasing
 	UPROPERTY(EditAnywhere)
 		TSubclassOf<ABoids> FunnelClass;
 	UPROPERTY(EditAnywhere)
-		TSubclassOf<AActor> Opponent;
+		int FunnelAmt = 5;
+	UPROPERTY(EditAnywhere)
+		AActor* FunnelTarget;
 private:
 	UCameraComponent* Camera;
 	UCharacterMovementComponent* MoveComponent;
@@ -62,6 +70,7 @@ private:
 	float bBoostCooldown = false;
 	float BoostTime = 0.0f;
 	float BoostCooldown = 1.0f;
+	float FunnelOffset = 500.0f;
 
-	ABoids* Funnels;
+	TArray<ABoids*> Funnels;
 };
