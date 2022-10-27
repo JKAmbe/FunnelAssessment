@@ -10,6 +10,7 @@ APlayerController3DM::APlayerController3DM()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	// calling to spawn funnels from construter doesnt seem to work
 }
 
 // Called when the game starts or when spawned
@@ -98,10 +99,10 @@ void APlayerController3DM::LookY(float val)
 
 void APlayerController3DM::BoostCheck()
 {
-	if (!bBoostCooldown)
+	// boost if players is not on a cooldown
+	if (bBoostActive)
 	{
-		// Increase player movement speed if boost is on until the duration is met
-		if (bBoostActive)
+		if (!bBoostCooldown)
 		{
 			if (BoostTime < MaxBoostDuration)
 			{
@@ -109,32 +110,33 @@ void APlayerController3DM::BoostCheck()
 				MoveComponent->MaxFlySpeed = FlySpeed * BoostMultiplier;
 				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("%f"), (BoostTime / MaxBoostDuration) * 100));
 			}
-			// disable boost and force cooldown when boost is used up
+			// force cooldown when boost is used up
 			if (BoostTime >= MaxBoostDuration)
 			{
-				BoostTime = 0.0f;
-				MoveComponent->MaxFlySpeed = FlySpeed;
-				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("No boost fuel")));
+				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("No boost fuel")));
 				bBoostActive = false;
 				bBoostCooldown = true;
 			}
 		}
 	}
 
-	// Regenerate boost if boost is inactive
-	if (!bBoostActive && BoostTime > 0.0f)
-	{
+	// restore boost when inactive
+	if (!bBoostActive)
+	{	
 		MoveComponent->MaxFlySpeed = FlySpeed;
-		BoostTime -= GetWorld()->GetDeltaSeconds();
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("%f"), (BoostTime / MaxBoostDuration) * 100));
-		// allow player to boost again if the boost is fully recovered
+		// restore boost when player is not using boost
+		if (BoostTime > 0.0f)
+		{
+			BoostTime -= GetWorld()->GetDeltaSeconds();
+			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("%f"), (BoostTime / MaxBoostDuration) * 100));
+		}
+		// allow player to boost again/reset cooldown if the boost is fully recovered
 		if (BoostTime <= 0.0f)
 		{
 			BoostTime = 0.0f;
 			bBoostCooldown = false;
 		}
 	}
-
 }
 
 void APlayerController3DM::BoostOn()
@@ -149,6 +151,7 @@ void APlayerController3DM::BoostOff()
 
 void APlayerController3DM::SpawnFunnels()
 {
+	UE_LOG(LogTemp, Warning, TEXT("Try Spawn"));
 	// Fills the Funnels TArray by spawning the set amount of funnels spaced out in equal length
 	if (FunnelClass)
 	{
@@ -166,6 +169,7 @@ void APlayerController3DM::SpawnFunnels()
 			{
 				NewFunnel->FollowTarget = FunnelTarget;
 			}
+			UE_LOG(LogTemp, Warning, TEXT("Spawned Funnel"));
 		}
 	}
 }

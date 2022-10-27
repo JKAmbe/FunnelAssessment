@@ -62,6 +62,8 @@ public:
 		int FunnelAmt = 5;
 	UPROPERTY(EditAnywhere)
 		AActor* FunnelTarget;
+	TArray<ABoids*> Funnels;
+
 private:
 	UCameraComponent* Camera;
 	UCharacterMovementComponent* MoveComponent;
@@ -71,6 +73,4 @@ private:
 	float BoostTime = 0.0f;
 	float BoostCooldown = 1.0f;
 	float FunnelOffset = 500.0f;
-
-	TArray<ABoids*> Funnels;
 };
