@@ -31,11 +31,16 @@ public:
 
 public:
 	// Movement functions
+	void SetMovementMode();
+	UFUNCTION(Server, Reliable)
+		void ServerSetMovementMode();
+
 	void MoveForward(float val);
 	void Strafe(float val);
 	void MoveVertical(float val);
 	void LookX(float val);
 	void LookY(float val);
+
 	void BoostCheck();
 	void BoostOn();
 	void BoostOff();
@@ -43,6 +48,7 @@ public:
 	// Player ability/feature functions
 	void SpawnFunnels();
 
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:
 	// Player movement and boost

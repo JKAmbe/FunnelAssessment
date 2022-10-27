@@ -2,6 +2,7 @@
 
 
 #include "PlayerController3DM.h"
+#include "Net/UnrealNetwork.h"
 #include "Components/InputComponent.h"
 
 // Sets default values
@@ -22,11 +23,7 @@ void APlayerController3DM::BeginPlay()
 	bUseControllerRotationPitch = true;
 
 	MoveComponent = GetCharacterMovement();
-	// set move mode as flying
-	MoveComponent->SetMovementMode(EMovementMode::MOVE_Flying);
-	// set move speed from custom vars
-	MoveComponent->MaxFlySpeed = FlySpeed;
-	MoveComponent->BrakingDecelerationFlying = FlyDeceleration;
+	SetMovementMode();
 
 	// Spawns the funnels
 	SpawnFunnels();
@@ -36,10 +33,37 @@ void APlayerController3DM::BeginPlay()
 void APlayerController3DM::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 	BoostCheck();
-
 }
+
+void APlayerController3DM::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+}
+
+// setting player movement
+void APlayerController3DM::SetMovementMode()
+{	
+	UE_LOG(LogTemp, Warning, TEXT("Hi"));
+	ServerSetMovementMode();
+	// set move mode as flying
+	MoveComponent->SetMovementMode(EMovementMode::MOVE_Flying);
+	// set move speed from custom vars
+	MoveComponent->MaxFlySpeed = FlySpeed;
+	MoveComponent->BrakingDecelerationFlying = FlyDeceleration;
+}
+
+// sever replication of player movement
+void APlayerController3DM::ServerSetMovementMode_Implementation()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Hi2"));
+	// set move mode as flying
+	MoveComponent->SetMovementMode(EMovementMode::MOVE_Flying);
+	// set move speed from custom vars
+	MoveComponent->MaxFlySpeed = FlySpeed;
+	MoveComponent->BrakingDecelerationFlying = FlyDeceleration;
+}
+
 
 // Called to bind functionality to input
 void APlayerController3DM::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -84,7 +108,6 @@ void APlayerController3DM::LookY(float val)
 	LookUpRotation.Pitch = val;
 	if (Camera)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Hi"));
 		if (abs(Camera->GetRelativeRotation().Pitch + LookUpRotation.Pitch >= 90.0f)) {
 
 			return;
