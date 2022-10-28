@@ -9,6 +9,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
+#include "Runtime/AIModule/Classes/AIController.h"
 #include "AIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
@@ -29,9 +30,10 @@ ABoids::ABoids()
 // Called when the game starts or when spawned
 void ABoids::BeginPlay()
 {
-
 	Super::BeginPlay();
-	GetAllBoids();
+	SpawnDefaultController();
+	UE_LOG(LogTemp, Warning, TEXT("tests"))
+	GetAllBoids(true);
 	MaxFlySpeedTMP = GetCharacterMovement()->MaxFlySpeed;
 	//UGameplayStatics::GetPlayerController(GetWorld(), 0)->LineOfSightTo(this, FVector(0,0,0), false);
 }
@@ -185,10 +187,18 @@ void ABoids::RotateToDirection(float dt, FVector target, float Strength)
 	SetActorRotation(FMath::RInterpConstantTo(GetActorRotation() , UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), target),dt, Strength));
 }
 
-void ABoids::GetAllBoids()
+void ABoids::GetAllBoids(bool recur)
 {
-	for (TActorIterator<ABoids> It(GetWorld()); It; ++It)
+	
+	AllBoids.Empty();
+	for (TActorIterator<ABoids> It(GetWorld()); It; ++It) {
 		AllBoids.Add(*It);
+		if (recur) {
+			UE_LOG(LogTemp, Warning, TEXT("test"))
+			It->GetAllBoids(false);
+		}
+			
+	}
 	AllBoids.Remove(this);
 }
 

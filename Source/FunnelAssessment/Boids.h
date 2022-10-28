@@ -54,7 +54,7 @@ public:
 	UPROPERTY(EditAnywhere, meta = (UIMin = 0.0f, UIMax = 1000.0f, NoSpinbox = false))
 		float AvoidanceDistanceRange;
 	void RotateToDirection(float dt, FVector direction, float Strength);
-	void GetAllBoids();
+	void GetAllBoids(bool recur);
 	void FireSequence(FVector CurrentLocation, FVector target);
 	TArray<ABoids*> AllBoids;
 	UPROPERTY(BlueprintReadWrite)
