@@ -42,11 +42,15 @@ public:
 	void LookY(float val);
 
 	void BoostCheck();
-	UFUNCTION(Server, Reliable)
-		void ServerBoostCheck();
 	void BoostOn();
+	UFUNCTION(Server, Reliable)
+		void ServerBoostOn();
 	void BoostOff();
+	UFUNCTION(Server, Reliable)
+		void ServerBoostOff();
 
+	UFUNCTION(Server, Reliable)
+		void ServerTest();
 
 	// Player ability/feature functions
 	void SpawnFunnels();
