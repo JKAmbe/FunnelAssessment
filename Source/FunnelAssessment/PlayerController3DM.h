@@ -42,8 +42,9 @@ public:
 	void LookY(float val);
 
 	void BoostCheck();
+	UFUNCTION(Server, Reliable)
+		void ServerBoostCheck();
 	void BoostOn();
-
 	void BoostOff();
 
 
@@ -76,14 +77,10 @@ private:
 	UCameraComponent* Camera;
 	UCharacterMovementComponent* MoveComponent;
 
-	UPROPERTY(Replicated)
-		bool bBoostActive = false;
-	UPROPERTY(Replicated)
-		float bBoostCooldown = false;
-	UPROPERTY(Replicated)
-		float BoostTime = 0.0f;
-	UPROPERTY(Replicated)
-		float BoostCooldown = 1.0f;
+	bool bBoostActive = false;
+	float bBoostCooldown = false;
+	float BoostTime = 0.0f;
+	float BoostCooldown = 1.0f;
 	float FunnelOffset = 500.0f;
 	float BoostSpeed;
 };

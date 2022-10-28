@@ -3,6 +3,7 @@
 
 #include "PlayerController3DM.h"
 #include "Net/UnrealNetwork.h"
+#include "Kismet/GameplayStatics.h"
 #include "Components/InputComponent.h"
 
 // Sets default values
@@ -37,6 +38,7 @@ void APlayerController3DM::BeginPlay()
 void APlayerController3DM::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
 	BoostCheck();
 }
 
@@ -44,10 +46,11 @@ void APlayerController3DM::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(APlayerController3DM, bBoostActive);
-	DOREPLIFETIME(APlayerController3DM, bBoostCooldown);
-	DOREPLIFETIME(APlayerController3DM, BoostTime);
-	DOREPLIFETIME(APlayerController3DM, BoostCooldown);
+	//DOREPLIFETIME(APlayerController3DM, MoveComponent);
+	//DOREPLIFETIME(APlayerController3DM, bBoostActive);
+	//DOREPLIFETIME(APlayerController3DM, bBoostCooldown);
+	//DOREPLIFETIME(APlayerController3DM, BoostTime);
+	//DOREPLIFETIME(APlayerController3DM, BoostCooldown);
 }
 
 // setting player movement
@@ -129,7 +132,6 @@ void APlayerController3DM::LookY(float val)
 
 void APlayerController3DM::BoostCheck()
 {
-
 	// boost if players is not on a cooldown
 	if (bBoostActive)
 	{
@@ -153,7 +155,7 @@ void APlayerController3DM::BoostCheck()
 
 	// restore boost when inactive
 	if (!bBoostActive)
-	{	
+	{
 		MoveComponent->MaxFlySpeed = FlySpeed;
 		// restore boost when player is not using boost
 		if (BoostTime > 0.0f)
@@ -169,6 +171,64 @@ void APlayerController3DM::BoostCheck()
 		}
 	}
 
+	if (HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("HI authority"));
+		if (bBoostActive)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("auth boost"));
+		}
+	}
+	if (GetLocalRole() == ROLE_AutonomousProxy)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("HI autonomous proxy"));
+		if (bBoostActive)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("auto boost"));
+		}
+	}
+}
+
+void APlayerController3DM::ServerBoostCheck_Implementation()
+{
+	// boost if players is not on a cooldown
+	if (bBoostActive)
+	{
+		if (!bBoostCooldown)
+		{
+			if (BoostTime < MaxBoostDuration)
+			{
+				BoostTime += GetWorld()->GetDeltaSeconds();
+				MoveComponent->MaxFlySpeed = BoostSpeed;
+				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("%f"), (BoostTime / MaxBoostDuration) * 100));
+			}
+			// force cooldown when boost is used up
+			if (BoostTime >= MaxBoostDuration)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("No boost fuel")));
+				bBoostActive = false;
+				bBoostCooldown = true;
+			}
+		}
+	}
+
+	// restore boost when inactive
+	if (!bBoostActive)
+	{
+		MoveComponent->MaxFlySpeed = FlySpeed;
+		// restore boost when player is not using boost
+		if (BoostTime > 0.0f)
+		{
+			BoostTime -= GetWorld()->GetDeltaSeconds();
+			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("%f"), (BoostTime / MaxBoostDuration) * 100));
+		}
+		// allow player to boost again/reset cooldown if the boost is fully recovered
+		if (BoostTime <= 0.0f)
+		{
+			BoostTime = 0.0f;
+			bBoostCooldown = false;
+		}
+	}
 }
 
 void APlayerController3DM::BoostOn()
