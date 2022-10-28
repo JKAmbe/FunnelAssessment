@@ -22,6 +22,7 @@ void APlayerController3DM::BeginPlay()
 	Camera = FindComponentByClass<UCameraComponent>();
 	bUseControllerRotationPitch = true;
 
+	// set the movement component and update the movement to the custom variables
 	MoveComponent = GetCharacterMovement();
 	SetMovementMode();
 
@@ -174,7 +175,6 @@ void APlayerController3DM::BoostOff()
 
 void APlayerController3DM::SpawnFunnels()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Try Spawn"));
 	// Fills the Funnels TArray by spawning the set amount of funnels spaced out in equal length
 	if (FunnelClass)
 	{
@@ -187,12 +187,12 @@ void APlayerController3DM::SpawnFunnels()
 			SpawnOffset.Y += ((FunnelOffset * FunnelAmt) / -2) + (FunnelOffset * i);
 			ABoids* NewFunnel = GetWorld()->SpawnActor<ABoids>(FunnelClass, SpawnOffset, this->GetActorRotation());
 			Funnels.Add(NewFunnel);
+			NewFunnel->SpawnDefaultController();
 			// sets the funnel's target
 			if (FunnelTarget)
 			{
 				NewFunnel->FollowTarget = FunnelTarget;
 			}
-			UE_LOG(LogTemp, Warning, TEXT("Spawned Funnel"));
 		}
 	}
 }
