@@ -9,6 +9,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
+#include "Runtime/AIModule/Classes/AIController.h"
+#include "AIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 
@@ -22,6 +24,7 @@ ABoids::ABoids()
 	AlignmentStrength = 5.0f;
 	CohesionStrength = 5.0f;
 	FollowStrength = 20.0f;
+	FireDuration = 0.1f;
 	CollisionAvoidanceStrength = 200.0f;
 }
 
@@ -29,8 +32,11 @@ ABoids::ABoids()
 void ABoids::BeginPlay()
 {
 	Super::BeginPlay();
-	GetAllBoids();
+	SpawnDefaultController();
+	UE_LOG(LogTemp, Warning, TEXT("tests"))
+	GetAllBoids(true);
 	MaxFlySpeedTMP = GetCharacterMovement()->MaxFlySpeed;
+	//UGameplayStatics::GetPlayerController(GetWorld(), 0)->LineOfSightTo(this, FVector(0,0,0), false);
 }
 
 // Called every frame
@@ -47,9 +53,13 @@ void ABoids::Tick(float DeltaTime)
 			LocalBoids.Add(boid);
 	}
 	//base boids behaviour, Seperation, Alignement, Cohesion
-	Separation(DeltaTime, LocalBoids, bFireable? SeperationStrength : 1.0f, CurrentPosition);
+	/*Separation(DeltaTime, LocalBoids, bFireable? SeperationStrength : 1.0f, CurrentPosition);
 	Alignment(DeltaTime, LocalBoids, bFireable ? AlignmentStrength : 1.0f, CurrentPosition);
-	Cohesion(DeltaTime, LocalBoids, bFireable ? CohesionStrength : 1.0f, CurrentPosition);
+	Cohesion(DeltaTime, LocalBoids, bFireable ? CohesionStrength : 1.0f, CurrentPosition);*/
+
+	Separation(DeltaTime, LocalBoids, SeperationStrength, CurrentPosition);
+	Alignment(DeltaTime, LocalBoids, AlignmentStrength, CurrentPosition);
+	Cohesion(DeltaTime, LocalBoids,  CohesionStrength, CurrentPosition);
 
 	//Obstacle Avoidance and target follow
 	if (FollowTarget)
@@ -60,8 +70,8 @@ void ABoids::Tick(float DeltaTime)
 		}
 	}
 		
-	AvoidCollision(DeltaTime, bFireable ? CollisionAvoidanceStrength : 1.0f, CurrentPosition);
-
+	AvoidCollision(DeltaTime, CollisionAvoidanceStrength, CurrentPosition);
+	//AvoidCollision(DeltaTime, bFireable ? CollisionAvoidanceStrength : 1.0f, CurrentPosition);
 	//Move forward, Direction(rotation) is decided by other behaviour
 	MoveForward();
 	//UE_LOG(LogTemp,Warning, TEXT("%f"), (float)bFireable)
@@ -159,17 +169,17 @@ void ABoids::FireSequence(FVector CurrentLocation, FVector target)
 	UGameplayStatics::PlaySoundAtLocation(this, BeamSound, CurrentLocation);
 	BeamParticle->SetBeamTargetPoint(0, target, 0);
 	BeamParticle->SetVisibility(true);
-	FTimerHandle TimerHandle;
+	
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()
 		{
 			GetCharacterMovement()->MaxFlySpeed = MaxFlySpeedTMP;
 			BeamParticle->SetVisibility(false);
-			FTimerHandle TimerHandle2;
+			//somehow this crashes it? //make except when follow target change reset the timer
 			GetWorld()->GetTimerManager().SetTimer(TimerHandle2, [&]()
 				{
 					bFireable = true;
 				}, UntilNextFire, false);
-		}, 0.1f, false);
+		}, FireDuration, false);
 	
 }
 
@@ -178,10 +188,18 @@ void ABoids::RotateToDirection(float dt, FVector target, float Strength)
 	SetActorRotation(FMath::RInterpConstantTo(GetActorRotation() , UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), target),dt, Strength));
 }
 
-void ABoids::GetAllBoids()
+void ABoids::GetAllBoids(bool recur)
 {
-	for (TActorIterator<ABoids> It(GetWorld()); It; ++It)
+	
+	AllBoids.Empty();
+	for (TActorIterator<ABoids> It(GetWorld()); It; ++It) {
 		AllBoids.Add(*It);
+		if (recur) {
+			UE_LOG(LogTemp, Warning, TEXT("test"))
+			It->GetAllBoids(false);
+		}
+			
+	}
 	AllBoids.Remove(this);
 }
 
