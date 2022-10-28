@@ -11,7 +11,7 @@ APlayerController3DM::APlayerController3DM()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	// calling to spawn funnels from construter doesnt seem to work
+	bReplicates = true;
 }
 
 // Called when the game starts or when spawned
@@ -19,6 +19,7 @@ void APlayerController3DM::BeginPlay()
 {
 	Super::BeginPlay();
 	
+
 	Camera = FindComponentByClass<UCameraComponent>();
 	bUseControllerRotationPitch = true;
 
@@ -28,6 +29,8 @@ void APlayerController3DM::BeginPlay()
 
 	// Spawns the funnels
 	SpawnFunnels();
+
+	BoostSpeed = FlySpeed * BoostMultiplier;
 }
 
 // Called every frame
@@ -40,12 +43,16 @@ void APlayerController3DM::Tick(float DeltaTime)
 void APlayerController3DM::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(APlayerController3DM, bBoostActive);
+	DOREPLIFETIME(APlayerController3DM, bBoostCooldown);
+	DOREPLIFETIME(APlayerController3DM, BoostTime);
+	DOREPLIFETIME(APlayerController3DM, BoostCooldown);
 }
 
 // setting player movement
 void APlayerController3DM::SetMovementMode()
 {	
-	UE_LOG(LogTemp, Warning, TEXT("Hi"));
 	ServerSetMovementMode();
 	// set move mode as flying
 	MoveComponent->SetMovementMode(EMovementMode::MOVE_Flying);
@@ -54,10 +61,9 @@ void APlayerController3DM::SetMovementMode()
 	MoveComponent->BrakingDecelerationFlying = FlyDeceleration;
 }
 
-// sever replication of player movement
+// sever replication of setting player movement
 void APlayerController3DM::ServerSetMovementMode_Implementation()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Hi2"));
 	// set move mode as flying
 	MoveComponent->SetMovementMode(EMovementMode::MOVE_Flying);
 	// set move speed from custom vars
@@ -123,6 +129,7 @@ void APlayerController3DM::LookY(float val)
 
 void APlayerController3DM::BoostCheck()
 {
+
 	// boost if players is not on a cooldown
 	if (bBoostActive)
 	{
@@ -131,7 +138,7 @@ void APlayerController3DM::BoostCheck()
 			if (BoostTime < MaxBoostDuration)
 			{
 				BoostTime += GetWorld()->GetDeltaSeconds();
-				MoveComponent->MaxFlySpeed = FlySpeed * BoostMultiplier;
+				MoveComponent->MaxFlySpeed = BoostSpeed;
 				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("%f"), (BoostTime / MaxBoostDuration) * 100));
 			}
 			// force cooldown when boost is used up
@@ -161,6 +168,7 @@ void APlayerController3DM::BoostCheck()
 			bBoostCooldown = false;
 		}
 	}
+
 }
 
 void APlayerController3DM::BoostOn()

@@ -43,7 +43,9 @@ public:
 
 	void BoostCheck();
 	void BoostOn();
+
 	void BoostOff();
+
 
 	// Player ability/feature functions
 	void SpawnFunnels();
@@ -74,9 +76,14 @@ private:
 	UCameraComponent* Camera;
 	UCharacterMovementComponent* MoveComponent;
 
-	bool bBoostActive = false;
-	float bBoostCooldown = false;
-	float BoostTime = 0.0f;
-	float BoostCooldown = 1.0f;
+	UPROPERTY(Replicated)
+		bool bBoostActive = false;
+	UPROPERTY(Replicated)
+		float bBoostCooldown = false;
+	UPROPERTY(Replicated)
+		float BoostTime = 0.0f;
+	UPROPERTY(Replicated)
+		float BoostCooldown = 1.0f;
 	float FunnelOffset = 500.0f;
+	float BoostSpeed;
 };
