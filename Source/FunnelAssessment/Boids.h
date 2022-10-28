@@ -40,7 +40,8 @@ public:
 		bool bFireable;
 	UPROPERTY(EditAnywhere, meta = (UIMin = 0.0f, UIMax = 5.0f, NoSpinbox = false))
 		float UntilNextFire;
-	
+	UPROPERTY(EditAnywhere, meta = (UIMin = 0.0f, UIMax = 1.0f, NoSpinbox = false))
+		float FireDuration;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=( UIMin = 1.0f, UIMax = 200.0f, ClampMin = 1.0f,NoSpinbox = false))
 		float SeperationStrength;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (UIMin = 1.0f, UIMax = 200.0f, ClampMin = 1.0f, NoSpinbox = false))
@@ -53,6 +54,8 @@ public:
 		float CollisionAvoidanceStrength;
 	UPROPERTY(EditAnywhere, meta = (UIMin = 0.0f, UIMax = 1000.0f, NoSpinbox = false))
 		float AvoidanceDistanceRange;
+	FTimerHandle TimerHandle;
+	FTimerHandle TimerHandle2;
 	void RotateToDirection(float dt, FVector direction, float Strength);
 	void GetAllBoids(bool recur);
 	void FireSequence(FVector CurrentLocation, FVector target);

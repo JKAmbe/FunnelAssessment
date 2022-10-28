@@ -24,6 +24,7 @@ ABoids::ABoids()
 	AlignmentStrength = 5.0f;
 	CohesionStrength = 5.0f;
 	FollowStrength = 20.0f;
+	FireDuration = 0.1f;
 	CollisionAvoidanceStrength = 200.0f;
 }
 
@@ -168,17 +169,17 @@ void ABoids::FireSequence(FVector CurrentLocation, FVector target)
 	UGameplayStatics::PlaySoundAtLocation(this, BeamSound, CurrentLocation);
 	BeamParticle->SetBeamTargetPoint(0, target, 0);
 	BeamParticle->SetVisibility(true);
-	FTimerHandle TimerHandle;
+	
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()
 		{
 			GetCharacterMovement()->MaxFlySpeed = MaxFlySpeedTMP;
 			BeamParticle->SetVisibility(false);
-			FTimerHandle TimerHandle2;
+			//somehow this crashes it? //make except when follow target change reset the timer
 			GetWorld()->GetTimerManager().SetTimer(TimerHandle2, [&]()
 				{
 					bFireable = true;
 				}, UntilNextFire, false);
-		}, 0.1f, false);
+		}, FireDuration, false);
 	
 }
 
