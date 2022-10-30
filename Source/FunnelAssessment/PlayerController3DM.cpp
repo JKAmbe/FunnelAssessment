@@ -36,11 +36,15 @@ void APlayerController3DM::BeginPlay()
 void APlayerController3DM::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	BoostCheck2();
 }
 
 void APlayerController3DM::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(APlayerController3DM, bBoostActive);
 }
 
 // setting player movement
@@ -120,6 +124,7 @@ void APlayerController3DM::LookY(float val)
 	}
 }
 
+// NOT USED
 void APlayerController3DM::BoostCheck()
 {
 	// boost if players is not on a cooldown
@@ -162,38 +167,66 @@ void APlayerController3DM::BoostCheck()
 	}
 }
 
+void APlayerController3DM::BoostCheck2()
+{
+
+	// Allow player to boost until BoostTime reaches the Max duration
+	if (bBoostActive)
+	{
+		if (BoostTime < MaxBoostDuration)
+		{
+			BoostTime += GetWorld()->GetDeltaSeconds();
+			MoveComponent->MaxFlySpeed = BoostSpeed;
+			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("%f"), (BoostTime / MaxBoostDuration) * 100));
+			// force turn off boost when max duration is met
+			if (BoostTime >= MaxBoostDuration)
+			{
+				bBoostActive = false;
+			}
+		}
+	}
+	if (!bBoostActive)
+	{
+		MoveComponent->MaxFlySpeed = FlySpeed;
+		if (BoostTime > 0.0f)
+		{
+			BoostTime -= GetWorld()->GetDeltaSeconds();
+			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("%f"), (BoostTime / MaxBoostDuration) * 100));
+		}
+	}
+}
+
 void APlayerController3DM::BoostOn()
 {
 	ServerBoostOn();
-	bBoostActive = true;
-	GetCharacterMovement()->MaxFlySpeed = BoostSpeed;
 	ServerTest();
 }
 
 void APlayerController3DM::ServerBoostOn_Implementation()
 {
-	GetCharacterMovement()->MaxFlySpeed = BoostSpeed;
+	bBoostActive = true;
 }
 
 void APlayerController3DM::BoostOff()
 {
 	ServerBoostOff();
-	bBoostActive = false;
-	GetCharacterMovement()->MaxFlySpeed = FlySpeed;
 	ServerTest();
 }
 
 void APlayerController3DM::ServerBoostOff_Implementation()
 {
-	GetCharacterMovement()->MaxFlySpeed = FlySpeed;
+	bBoostActive = false;
 }
 
 void APlayerController3DM::ServerTest_Implementation()
 {
-	UE_LOG(LogTemp, Warning, TEXT("server test boob"));
 	if (bBoostActive)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("server test boob2"));
+		UE_LOG(LogTemp, Warning, TEXT("Boost on"));
+	}
+	if (!bBoostActive)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Boost off"));
 	}
 }
 
