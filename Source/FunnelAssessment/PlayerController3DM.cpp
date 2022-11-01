@@ -4,8 +4,6 @@
 #include "PlayerController3DM.h"
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
-#include "GameFramework/GameState.h"
-#include "GameFramework/PlayerState.h"
 #include "Components/InputComponent.h"
 
 // Sets default values
@@ -28,31 +26,21 @@ void APlayerController3DM::BeginPlay()
 	MoveComponent = GetCharacterMovement();
 	SetMovementMode();
 
-	// Set the opponent as target and spawn funnels
-	SetTarget();
-	SpawnFunnels();
+	// Spawns the funnels
+	//SpawnFunnels();
+
+	BoostSpeed = FlySpeed * BoostMultiplier;
 }
 
 // Called every frame
 void APlayerController3DM::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	// Attempt to set the target if its not already set
-	if (!FunnelTarget)
-	{
-		SetTarget();
-	}
-	// Run the check for boost
-	BoostCheck2();
 }
 
 void APlayerController3DM::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(APlayerController3DM, bBoostActive);
-	DOREPLIFETIME(APlayerController3DM, Funnels);
 }
 
 // setting player movement
@@ -64,9 +52,6 @@ void APlayerController3DM::SetMovementMode()
 	// set move speed from custom vars
 	MoveComponent->MaxFlySpeed = FlySpeed;
 	MoveComponent->BrakingDecelerationFlying = FlyDeceleration;
-
-	// Set boost speed based on FlySpeed and multiplier
-	BoostSpeed = FlySpeed * BoostMultiplier;
 }
 
 // sever replication of setting player movement
@@ -135,7 +120,6 @@ void APlayerController3DM::LookY(float val)
 	}
 }
 
-// NOT USED
 void APlayerController3DM::BoostCheck()
 {
 	// boost if players is not on a cooldown
@@ -178,88 +162,42 @@ void APlayerController3DM::BoostCheck()
 	}
 }
 
-void APlayerController3DM::BoostCheck2()
-{
-	// Allow player to boost until BoostTime reaches the Max duration
-	if (bBoostActive)
-	{
-		if (BoostTime < MaxBoostDuration)
-		{
-			BoostTime += GetWorld()->GetDeltaSeconds();
-			MoveComponent->MaxFlySpeed = BoostSpeed;
-			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("%f"), (BoostTime / MaxBoostDuration) * 100));
-			// force turn off boost when max duration is met
-			if (BoostTime >= MaxBoostDuration)
-			{
-				bBoostActive = false;
-			}
-		}
-	}
-	// Restore BoostTime when player is not using boost
-	if (!bBoostActive)
-	{
-		MoveComponent->MaxFlySpeed = FlySpeed;
-		if (BoostTime > 0.0f)
-		{
-			BoostTime -= GetWorld()->GetDeltaSeconds();
-			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("%f"), (BoostTime / MaxBoostDuration) * 100));
-		}
-	}
-}
-
 void APlayerController3DM::BoostOn()
 {
 	ServerBoostOn();
+	bBoostActive = true;
+	GetCharacterMovement()->MaxFlySpeed = BoostSpeed;
+	ServerTest();
 }
 
 void APlayerController3DM::ServerBoostOn_Implementation()
 {
-	bBoostActive = true;
+	GetCharacterMovement()->MaxFlySpeed = BoostSpeed;
 }
 
 void APlayerController3DM::BoostOff()
 {
 	ServerBoostOff();
+	bBoostActive = false;
+	GetCharacterMovement()->MaxFlySpeed = FlySpeed;
+	ServerTest();
 }
 
 void APlayerController3DM::ServerBoostOff_Implementation()
 {
-	bBoostActive = false;
+	GetCharacterMovement()->MaxFlySpeed = FlySpeed;
 }
 
-void APlayerController3DM::SetTarget()
+void APlayerController3DM::ServerTest_Implementation()
 {
-	// Get all the player actors in the world and set the opponent as target
-	for (TActorIterator<APlayerController3DM> It(GetWorld()); It; ++It)
+	UE_LOG(LogTemp, Warning, TEXT("server test boob"));
+	if (bBoostActive)
 	{
-		// Get the gamestate to access the array keeping all the players
-		AGameStateBase* GameState = GetWorld()->GetGameState();
-		for (int i = 0; i < GameState->PlayerArray.Num(); i++)
-		{
-			APlayerController3DM* OtherPlayer = Cast<APlayerController3DM>(GameState->PlayerArray[i]->GetPawn());
-			// Set the player as the funnel target when its not the same as this player (ie the opponent)
-			if (OtherPlayer != this)
-			{
-				FunnelTarget = OtherPlayer;
-			}
-		}
+		UE_LOG(LogTemp, Warning, TEXT("server test boob2"));
 	}
-	// update the funnel target alongside it
-	SetFunnelTarget();
 }
 
 void APlayerController3DM::SpawnFunnels()
-{
-	// spawn funnels on client or server
-	if (IsLocallyControlled())
-	{
-		ServerSpawnFunnels();
-	}
-}
-
-
-// Server Implementation of SpawnFunnels, should be called when the player is controlled pawn
-void APlayerController3DM::ServerSpawnFunnels_Implementation()
 {
 	// Fills the Funnels TArray by spawning the set amount of funnels spaced out in equal length
 	if (FunnelClass)
@@ -274,21 +212,10 @@ void APlayerController3DM::ServerSpawnFunnels_Implementation()
 			ABoids* NewFunnel = GetWorld()->SpawnActor<ABoids>(FunnelClass, SpawnOffset, this->GetActorRotation());
 			Funnels.Add(NewFunnel);
 			NewFunnel->SpawnDefaultController();
-			SetFunnelTarget();
-		}
-	}
-}
-
-// Set the funnel's FollowTarget to this FunnelTarget
-void APlayerController3DM::SetFunnelTarget()
-{
-	if (FunnelTarget)
-	{
-		for (int i = 0; i < Funnels.Num(); i++)
-		{
-			if (Funnels[i])
+			// sets the funnel's target
+			if (FunnelTarget)
 			{
-				Funnels[i]->FollowTarget = FunnelTarget;
+				NewFunnel->FollowTarget = FunnelTarget;
 			}
 		}
 	}
