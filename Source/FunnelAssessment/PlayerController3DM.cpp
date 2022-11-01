@@ -4,6 +4,8 @@
 #include "PlayerController3DM.h"
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/GameState.h"
+#include "GameFramework/PlayerState.h"
 #include "Components/InputComponent.h"
 
 // Sets default values
@@ -230,11 +232,36 @@ void APlayerController3DM::SetTarget()
 	// Get all the player actors in the world and set the opponent as target
 	for (TActorIterator<APlayerController3DM> It(GetWorld()); It; ++It)
 	{
-		// Set FunnelTarget if its not the same actor as this (ie the other actor)
-		if (*It->GetName() != this->GetName())
+		//// Set FunnelTarget if its not the same actor as this (ie the other actor)
+		////if (*It->GetName() != this->GetName())
+		////{
+		////	FunnelTarget = *It;
+		////}
+		//AGameStateBase* GameState = GetWorld()->GetGameState();
+		//if (GameState)
+		//{
+		//	//for (int i = 0; i < GameState->PlayerArray.Num(); i++)
+		//	//{
+		//	//	APlayerState* Player = GameState->PlayerArray[i];
+		//	//	UE_LOG(LogTemp, Warning, TEXT("%s"), *Player->GetPlayerName());
+		//	//}
+		//}
+
+		AGameStateBase* GameState = GetWorld()->GetGameState();
+		for (int i = 0; i < GameState->PlayerArray.Num(); i++)
 		{
-			FunnelTarget = *It;
+			APlayerController3DM* OtherPlayer = Cast<APlayerController3DM>(GameState->PlayerArray[i]->GetPawn());
+			if (OtherPlayer != this)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("No"));
+				FunnelTarget = OtherPlayer;
+			}
+			if (OtherPlayer == this)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Yes"));
+			}
 		}
+
 	}
 	SetFunnelTarget();
 }
@@ -283,5 +310,4 @@ void APlayerController3DM::SetFunnelTarget()
 			}
 		}
 	}
-
 }
