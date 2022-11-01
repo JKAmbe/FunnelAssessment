@@ -27,7 +27,7 @@ void APlayerController3DM::BeginPlay()
 	SetMovementMode();
 
 	// Spawns the funnels
-	SpawnFunnels();
+	//SpawnFunnels();
 
 	BoostSpeed = FlySpeed * BoostMultiplier;
 }
