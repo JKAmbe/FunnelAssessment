@@ -232,37 +232,19 @@ void APlayerController3DM::SetTarget()
 	// Get all the player actors in the world and set the opponent as target
 	for (TActorIterator<APlayerController3DM> It(GetWorld()); It; ++It)
 	{
-		//// Set FunnelTarget if its not the same actor as this (ie the other actor)
-		////if (*It->GetName() != this->GetName())
-		////{
-		////	FunnelTarget = *It;
-		////}
-		//AGameStateBase* GameState = GetWorld()->GetGameState();
-		//if (GameState)
-		//{
-		//	//for (int i = 0; i < GameState->PlayerArray.Num(); i++)
-		//	//{
-		//	//	APlayerState* Player = GameState->PlayerArray[i];
-		//	//	UE_LOG(LogTemp, Warning, TEXT("%s"), *Player->GetPlayerName());
-		//	//}
-		//}
-
+		// Get the gamestate to access the array keeping all the players
 		AGameStateBase* GameState = GetWorld()->GetGameState();
 		for (int i = 0; i < GameState->PlayerArray.Num(); i++)
 		{
 			APlayerController3DM* OtherPlayer = Cast<APlayerController3DM>(GameState->PlayerArray[i]->GetPawn());
+			// Set the player as the funnel target when its not the same as this player (ie the opponent)
 			if (OtherPlayer != this)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("No"));
 				FunnelTarget = OtherPlayer;
 			}
-			if (OtherPlayer == this)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Yes"));
-			}
 		}
-
 	}
+	// update the funnel target alongside it
 	SetFunnelTarget();
 }
 
@@ -297,6 +279,7 @@ void APlayerController3DM::ServerSpawnFunnels_Implementation()
 	}
 }
 
+// Set the funnel's FollowTarget to this FunnelTarget
 void APlayerController3DM::SetFunnelTarget()
 {
 	if (FunnelTarget)
@@ -306,7 +289,6 @@ void APlayerController3DM::SetFunnelTarget()
 			if (Funnels[i])
 			{
 				Funnels[i]->FollowTarget = FunnelTarget;
-				UE_LOG(LogTemp, Warning, TEXT("%s"), *Funnels[i]->FollowTarget->GetName());
 			}
 		}
 	}
