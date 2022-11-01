@@ -50,13 +50,12 @@ public:
 	UFUNCTION(Server, Reliable)
 		void ServerBoostOff();
 
-	UFUNCTION(Server, Reliable)
-		void ServerTest();
-
-	// Player ability/feature functions
+	// Player functions
+	void SetTarget();
 	void SpawnFunnels();
 	UFUNCTION(Server, Reliable)
 		void ServerSpawnFunnels();
+	void SetFunnelTarget();
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -78,7 +77,7 @@ public:
 		int FunnelAmt = 5;
 	UPROPERTY(EditAnywhere)
 		AActor* FunnelTarget;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Replicated)
 		TArray<ABoids*> Funnels;
 
 private:

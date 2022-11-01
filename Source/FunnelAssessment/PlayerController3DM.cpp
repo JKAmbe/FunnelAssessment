@@ -26,10 +26,9 @@ void APlayerController3DM::BeginPlay()
 	MoveComponent = GetCharacterMovement();
 	SetMovementMode();
 
-	// Spawns the funnels
+	// Set the opponent as target and spawn funnels
+	SetTarget();
 	SpawnFunnels();
-
-	BoostSpeed = FlySpeed * BoostMultiplier;
 }
 
 // Called every frame
@@ -37,6 +36,12 @@ void APlayerController3DM::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// Attempt to set the target if its not already set
+	if (!FunnelTarget)
+	{
+		SetTarget();
+	}
+	// Run the check for boost
 	BoostCheck2();
 }
 
@@ -45,6 +50,7 @@ void APlayerController3DM::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(APlayerController3DM, bBoostActive);
+	DOREPLIFETIME(APlayerController3DM, Funnels);
 }
 
 // setting player movement
@@ -56,6 +62,9 @@ void APlayerController3DM::SetMovementMode()
 	// set move speed from custom vars
 	MoveComponent->MaxFlySpeed = FlySpeed;
 	MoveComponent->BrakingDecelerationFlying = FlyDeceleration;
+
+	// Set boost speed based on FlySpeed and multiplier
+	BoostSpeed = FlySpeed * BoostMultiplier;
 }
 
 // sever replication of setting player movement
@@ -169,7 +178,6 @@ void APlayerController3DM::BoostCheck()
 
 void APlayerController3DM::BoostCheck2()
 {
-
 	// Allow player to boost until BoostTime reaches the Max duration
 	if (bBoostActive)
 	{
@@ -185,6 +193,7 @@ void APlayerController3DM::BoostCheck2()
 			}
 		}
 	}
+	// Restore BoostTime when player is not using boost
 	if (!bBoostActive)
 	{
 		MoveComponent->MaxFlySpeed = FlySpeed;
@@ -199,7 +208,6 @@ void APlayerController3DM::BoostCheck2()
 void APlayerController3DM::BoostOn()
 {
 	ServerBoostOn();
-	ServerTest();
 }
 
 void APlayerController3DM::ServerBoostOn_Implementation()
@@ -210,7 +218,6 @@ void APlayerController3DM::ServerBoostOn_Implementation()
 void APlayerController3DM::BoostOff()
 {
 	ServerBoostOff();
-	ServerTest();
 }
 
 void APlayerController3DM::ServerBoostOff_Implementation()
@@ -218,44 +225,27 @@ void APlayerController3DM::ServerBoostOff_Implementation()
 	bBoostActive = false;
 }
 
-void APlayerController3DM::ServerTest_Implementation()
+void APlayerController3DM::SetTarget()
 {
-	if (bBoostActive)
+	// Get all the player actors in the world and set the opponent as target
+	for (TActorIterator<APlayerController3DM> It(GetWorld()); It; ++It)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Boost on"));
+		// Set FunnelTarget if its not the same actor as this (ie the other actor)
+		if (*It->GetName() != this->GetName())
+		{
+			FunnelTarget = *It;
+		}
 	}
-	if (!bBoostActive)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Boost off"));
-	}
+	SetFunnelTarget();
 }
 
 void APlayerController3DM::SpawnFunnels()
 {
+	// spawn funnels on client or server
 	if (IsLocallyControlled())
 	{
 		ServerSpawnFunnels();
 	}
-	//// Fills the Funnels TArray by spawning the set amount of funnels spaced out in equal length
-	//if (FunnelClass)
-	//{
-	//	for (int i = 0; i < FunnelAmt; i++)
-	//	{
-	//		FVector root = this->GetActorLocation();
-	//		// Set the initial spawn location
-	//		FVector SpawnOffset = root;
-	//		SpawnOffset.Z += FunnelOffset;
-	//		SpawnOffset.Y += ((FunnelOffset * FunnelAmt) / -2) + (FunnelOffset * i);
-	//		ABoids* NewFunnel = GetWorld()->SpawnActor<ABoids>(FunnelClass, SpawnOffset, this->GetActorRotation());
-	//		Funnels.Add(NewFunnel);
-	//		NewFunnel->SpawnDefaultController();
-	//		// sets the funnel's target
-	//		if (FunnelTarget)
-	//		{
-	//			NewFunnel->FollowTarget = FunnelTarget;
-	//		}
-	//	}
-	//}
 }
 
 
@@ -275,11 +265,23 @@ void APlayerController3DM::ServerSpawnFunnels_Implementation()
 			ABoids* NewFunnel = GetWorld()->SpawnActor<ABoids>(FunnelClass, SpawnOffset, this->GetActorRotation());
 			Funnels.Add(NewFunnel);
 			NewFunnel->SpawnDefaultController();
-			// sets the funnel's target
-			if (FunnelTarget)
+			SetFunnelTarget();
+		}
+	}
+}
+
+void APlayerController3DM::SetFunnelTarget()
+{
+	if (FunnelTarget)
+	{
+		for (int i = 0; i < Funnels.Num(); i++)
+		{
+			if (Funnels[i])
 			{
-				NewFunnel->FollowTarget = FunnelTarget;
+				Funnels[i]->FollowTarget = FunnelTarget;
+				UE_LOG(LogTemp, Warning, TEXT("%s"), *Funnels[i]->FollowTarget->GetName());
 			}
 		}
 	}
+
 }
