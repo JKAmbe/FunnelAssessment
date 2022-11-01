@@ -232,6 +232,36 @@ void APlayerController3DM::ServerTest_Implementation()
 
 void APlayerController3DM::SpawnFunnels()
 {
+	if (IsLocallyControlled())
+	{
+		ServerSpawnFunnels();
+	}
+	//// Fills the Funnels TArray by spawning the set amount of funnels spaced out in equal length
+	//if (FunnelClass)
+	//{
+	//	for (int i = 0; i < FunnelAmt; i++)
+	//	{
+	//		FVector root = this->GetActorLocation();
+	//		// Set the initial spawn location
+	//		FVector SpawnOffset = root;
+	//		SpawnOffset.Z += FunnelOffset;
+	//		SpawnOffset.Y += ((FunnelOffset * FunnelAmt) / -2) + (FunnelOffset * i);
+	//		ABoids* NewFunnel = GetWorld()->SpawnActor<ABoids>(FunnelClass, SpawnOffset, this->GetActorRotation());
+	//		Funnels.Add(NewFunnel);
+	//		NewFunnel->SpawnDefaultController();
+	//		// sets the funnel's target
+	//		if (FunnelTarget)
+	//		{
+	//			NewFunnel->FollowTarget = FunnelTarget;
+	//		}
+	//	}
+	//}
+}
+
+
+// Server Implementation of SpawnFunnels, should be called when the player is controlled pawn
+void APlayerController3DM::ServerSpawnFunnels_Implementation()
+{
 	// Fills the Funnels TArray by spawning the set amount of funnels spaced out in equal length
 	if (FunnelClass)
 	{

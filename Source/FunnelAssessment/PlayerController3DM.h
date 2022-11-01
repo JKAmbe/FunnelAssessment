@@ -55,6 +55,8 @@ public:
 
 	// Player ability/feature functions
 	void SpawnFunnels();
+	UFUNCTION(Server, Reliable)
+		void ServerSpawnFunnels();
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -76,7 +78,8 @@ public:
 		int FunnelAmt = 5;
 	UPROPERTY(EditAnywhere)
 		AActor* FunnelTarget;
-	TArray<ABoids*> Funnels;
+	UPROPERTY(EditAnywhere)
+		TArray<ABoids*> Funnels;
 
 private:
 	UCameraComponent* Camera;

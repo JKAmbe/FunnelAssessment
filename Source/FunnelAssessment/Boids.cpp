@@ -47,10 +47,14 @@ void ABoids::Tick(float DeltaTime)
 	FVector CurrentPosition = GetActorLocation();
 	for (ABoids* boid : AllBoids)
 	{
-		FVector RelativePosition = boid->GetActorLocation() - CurrentPosition;
-		float Angle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(GetActorForwardVector(), RelativePosition.GetSafeNormal())));
-		if (RelativePosition.IsNearlyZero(LocalRadius) && Angle <=30)
-			LocalBoids.Add(boid);
+		if (boid)
+		{
+			FVector RelativePosition = boid->GetActorLocation() - CurrentPosition;
+			float Angle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(GetActorForwardVector(), RelativePosition.GetSafeNormal())));
+			if (RelativePosition.IsNearlyZero(LocalRadius) && Angle <= 30)
+				LocalBoids.Add(boid);
+		}
+
 	}
 	//base boids behaviour, Seperation, Alignement, Cohesion
 	/*Separation(DeltaTime, LocalBoids, bFireable? SeperationStrength : 1.0f, CurrentPosition);
