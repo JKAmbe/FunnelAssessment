@@ -30,7 +30,7 @@ void APlayerController3DM::BeginPlay()
 
 	// Set the opponent as target and spawn funnels
 	SetTarget();
-	SpawnFunnels();
+	//SpawnFunnels();
 }
 
 // Called every frame
