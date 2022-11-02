@@ -57,6 +57,8 @@ public:
 		void ServerSpawnFunnels();
 	void SetFunnelTarget();
 
+	void OnDeath();
+
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:

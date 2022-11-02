@@ -30,7 +30,7 @@ void APlayerController3DM::BeginPlay()
 
 	// Set the opponent as target and spawn funnels
 	SetTarget();
-	//SpawnFunnels();
+	SpawnFunnels();
 }
 
 // Called every frame
@@ -292,4 +292,9 @@ void APlayerController3DM::SetFunnelTarget()
 			}
 		}
 	}
+}
+
+void APlayerController3DM::OnDeath()
+{
+	UE_LOG(LogTemp, Warning, TEXT("%s is dead"), *this->GetName());
 }

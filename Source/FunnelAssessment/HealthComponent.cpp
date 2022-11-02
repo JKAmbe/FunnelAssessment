@@ -2,6 +2,7 @@
 
 
 #include "HealthComponent.h"
+#include "PlayerController3DM.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
@@ -21,7 +22,8 @@ void UHealthComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	
+	// Set the currenthealt ot the max health on start
+	CurrentHealth = MaxHealth;
 }
 
 
@@ -38,4 +40,16 @@ void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UHealthComponent, CurrentHealth);
+}
+
+void UHealthComponent::TakeDamage()
+{
+	CurrentHealth--;
+	UE_LOG(LogTemp, Warning, TEXT("%f"), CurrentHealth);
+	APlayerController3DM* Owner = Cast<APlayerController3DM>(GetOwner());
+	if (Owner && CurrentHealth <= 0.0f)
+	{
+		Owner->OnDeath();
+	}
+	
 }

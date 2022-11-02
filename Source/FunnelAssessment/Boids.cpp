@@ -11,6 +11,7 @@
 #include "Engine/World.h"
 #include "Runtime/AIModule/Classes/AIController.h"
 #include "AIController.h"
+#include "HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 
@@ -173,7 +174,13 @@ void ABoids::FireSequence(FVector CurrentLocation, FVector target)
 	UGameplayStatics::PlaySoundAtLocation(this, BeamSound, CurrentLocation);
 	BeamParticle->SetBeamTargetPoint(0, target, 0);
 	BeamParticle->SetVisibility(true);
-	
+	// Get the health component of the target and take damage
+	UHealthComponent* TargetHealth = Cast<UHealthComponent>(FollowTarget->GetComponentByClass(UHealthComponent::StaticClass()));
+	if (TargetHealth)
+	{
+		TargetHealth->TakeDamage();
+		UE_LOG(LogTemp, Warning, TEXT("Hi23"));
+	}
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()
 		{
 			GetCharacterMovement()->MaxFlySpeed = MaxFlySpeedTMP;
@@ -202,7 +209,6 @@ void ABoids::GetAllBoids(bool recur)
 			UE_LOG(LogTemp, Warning, TEXT("test"))
 			It->GetAllBoids(false);
 		}
-			
 	}
 	AllBoids.Remove(this);
 }
