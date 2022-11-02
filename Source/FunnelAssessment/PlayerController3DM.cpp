@@ -54,6 +54,7 @@ void APlayerController3DM::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 
 	DOREPLIFETIME(APlayerController3DM, bBoostActive);
 	DOREPLIFETIME(APlayerController3DM, Funnels);
+	DOREPLIFETIME(APlayerController3DM, bPreventLockon);
 }
 
 // setting player movement
@@ -206,6 +207,13 @@ void APlayerController3DM::BoostCheck2()
 			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("%f"), (BoostTime / MaxBoostDuration) * 100));
 		}
 	}
+	LockonCheck();
+}
+
+// turn bPreventLockon depending on if the player is boosting or not
+void APlayerController3DM::LockonCheck()
+{
+	bPreventLockon = bBoostActive;
 }
 
 void APlayerController3DM::BoostOn()

@@ -49,6 +49,7 @@ public:
 	void BoostOff();
 	UFUNCTION(Server, Reliable)
 		void ServerBoostOff();
+	void LockonCheck();
 
 	// Player functions
 	void SetTarget();
@@ -81,6 +82,8 @@ public:
 		AActor* FunnelTarget;
 	UPROPERTY(EditAnywhere, Replicated)
 		TArray<ABoids*> Funnels;
+	UPROPERTY(Replicated)
+		bool bPreventLockon = false;
 
 private:
 	UCameraComponent* Camera;

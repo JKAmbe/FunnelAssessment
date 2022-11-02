@@ -12,6 +12,7 @@
 #include "Runtime/AIModule/Classes/AIController.h"
 #include "AIController.h"
 #include "HealthComponent.h"
+#include "PlayerController3DM.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 
@@ -69,10 +70,15 @@ void ABoids::Tick(float DeltaTime)
 	//Obstacle Avoidance and target follow
 	if (FollowTarget)
 	{
-		FlyToTarget(DeltaTime, FollowTarget->GetActorLocation(), bFireable ? FollowStrength:1.0f, CurrentPosition);
-		if ((FollowTarget->GetActorLocation() - CurrentPosition).IsNearlyZero(LocalRadius) && bFireable == true) {
-			FireSequence(CurrentPosition, FollowTarget->GetActorLocation());
+		// Follow target only when it can get a lock
+		if (!Cast<APlayerController3DM>(FollowTarget)->bPreventLockon)
+		{
+			FlyToTarget(DeltaTime, FollowTarget->GetActorLocation(), bFireable ? FollowStrength : 1.0f, CurrentPosition);
+			if ((FollowTarget->GetActorLocation() - CurrentPosition).IsNearlyZero(LocalRadius) && bFireable == true) {
+				FireSequence(CurrentPosition, FollowTarget->GetActorLocation());
+			}
 		}
+
 	}
 		
 	AvoidCollision(DeltaTime, CollisionAvoidanceStrength, CurrentPosition);
