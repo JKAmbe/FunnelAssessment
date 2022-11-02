@@ -45,7 +45,6 @@ void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 void UHealthComponent::TakeDamage()
 {
 	CurrentHealth--;
-	UE_LOG(LogTemp, Warning, TEXT("%f"), CurrentHealth);
 	APlayerController3DM* Owner = Cast<APlayerController3DM>(GetOwner());
 	if (Owner && CurrentHealth <= 0.0f)
 	{

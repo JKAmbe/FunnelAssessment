@@ -297,4 +297,8 @@ void APlayerController3DM::SetFunnelTarget()
 void APlayerController3DM::OnDeath()
 {
 	UE_LOG(LogTemp, Warning, TEXT("%s is dead"), *this->GetName());
+	if (GetController())
+	{
+		GetController()->GetPawn()->SetLifeSpan(0.1f);
+	}
 }

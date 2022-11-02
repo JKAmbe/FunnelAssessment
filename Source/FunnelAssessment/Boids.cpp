@@ -166,32 +166,34 @@ void ABoids::AvoidCollision(float dt, float Strength, FVector CurrentLocation)
 
 void ABoids::FireSequence(FVector CurrentLocation, FVector target)
 {
-	bFireable = false;
-	UCharacterMovementComponent* Movement = GetCharacterMovement();
-	Movement->StopMovementImmediately();
-	Movement->MaxFlySpeed = 0;
-	SetActorRotation(UKismetMathLibrary::FindLookAtRotation(CurrentLocation, target));
-	UGameplayStatics::PlaySoundAtLocation(this, BeamSound, CurrentLocation);
-	BeamParticle->SetBeamTargetPoint(0, target, 0);
-	BeamParticle->SetVisibility(true);
-	// Get the health component of the target and take damage
-	UHealthComponent* TargetHealth = Cast<UHealthComponent>(FollowTarget->GetComponentByClass(UHealthComponent::StaticClass()));
-	if (TargetHealth)
+	// Check if target exists first so that it doesnt shoot at the air after the target is dead
+	if (FollowTarget)
 	{
-		TargetHealth->TakeDamage();
-		UE_LOG(LogTemp, Warning, TEXT("Hi23"));
-	}
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()
+		bFireable = false;
+		UCharacterMovementComponent* Movement = GetCharacterMovement();
+		Movement->StopMovementImmediately();
+		Movement->MaxFlySpeed = 0;
+		SetActorRotation(UKismetMathLibrary::FindLookAtRotation(CurrentLocation, target));
+		UGameplayStatics::PlaySoundAtLocation(this, BeamSound, CurrentLocation);
+		BeamParticle->SetBeamTargetPoint(0, target, 0);
+		BeamParticle->SetVisibility(true);
+		// Get the health component of the target and take damage
+		UHealthComponent* TargetHealth = Cast<UHealthComponent>(FollowTarget->GetComponentByClass(UHealthComponent::StaticClass()));
+		if (TargetHealth)
 		{
-			GetCharacterMovement()->MaxFlySpeed = MaxFlySpeedTMP;
-			BeamParticle->SetVisibility(false);
-			//somehow this crashes it? //make except when follow target change reset the timer
-			GetWorld()->GetTimerManager().SetTimer(TimerHandle2, [&]()
-				{
-					bFireable = true;
-				}, UntilNextFire, false);
-		}, FireDuration, false);
-	
+			TargetHealth->TakeDamage();
+		}
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()
+			{
+				GetCharacterMovement()->MaxFlySpeed = MaxFlySpeedTMP;
+				BeamParticle->SetVisibility(false);
+				//somehow this crashes it? //make except when follow target change reset the timer
+				GetWorld()->GetTimerManager().SetTimer(TimerHandle2, [&]()
+					{
+						bFireable = true;
+					}, UntilNextFire, false);
+			}, FireDuration, false);
+	}
 }
 
 void ABoids::RotateToDirection(float dt, FVector target, float Strength)
@@ -209,6 +211,7 @@ void ABoids::GetAllBoids(bool recur)
 			UE_LOG(LogTemp, Warning, TEXT("test"))
 			It->GetAllBoids(false);
 		}
+			
 	}
 	AllBoids.Remove(this);
 }
