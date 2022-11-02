@@ -14,4 +14,6 @@ class FUNNELASSESSMENT_API AMultiplayerGamemode : public AGameMode
 {
 	GENERATED_BODY()
 	
+public:
+	void PlayerDeath(AController* Controller);
 };

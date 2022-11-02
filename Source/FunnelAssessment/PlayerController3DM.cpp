@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/GameState.h"
 #include "GameFramework/PlayerState.h"
+#include "MultiplayerGamemode.h"
 #include "Components/InputComponent.h"
 
 // Sets default values
@@ -294,11 +295,13 @@ void APlayerController3DM::SetFunnelTarget()
 	}
 }
 
+// Call the gamemode function to delete this character
 void APlayerController3DM::OnDeath()
 {
-	UE_LOG(LogTemp, Warning, TEXT("%s is dead"), *this->GetName());
-	if (GetController())
+	AMultiplayerGamemode* Gamemode = Cast<AMultiplayerGamemode>(GetWorld()->GetAuthGameMode());
+	if (Gamemode)
 	{
-		GetController()->GetPawn()->SetLifeSpan(0.1f);
+		Gamemode->PlayerDeath(GetController());
+		UE_LOG(LogTemp, Warning, TEXT("Player is dead"));
 	}
 }
