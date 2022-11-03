@@ -16,7 +16,8 @@ class FUNNELASSESSMENT_API ABoids : public ACharacter
 public:	
 	// Sets default values for this actor's properties
 	ABoids();
-	float MaxFlySpeedTMP;
+	UPROPERTY(Replicated)
+		float MaxFlySpeedTMP;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -34,8 +35,10 @@ public:
 		float LocalRadius;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		USoundBase* BeamSound;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+
+	UPROPERTY(Replicated,EditAnywhere, BlueprintReadWrite)
 		AActor* FollowTarget;
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		bool bFireable;
 	UPROPERTY(EditAnywhere, meta = (UIMin = 0.0f, UIMax = 5.0f, NoSpinbox = false))
@@ -54,12 +57,13 @@ public:
 		float CollisionAvoidanceStrength;
 	UPROPERTY(EditAnywhere, meta = (UIMin = 0.0f, UIMax = 1000.0f, NoSpinbox = false))
 		float AvoidanceDistanceRange;
-	FTimerHandle TimerHandle;
-	FTimerHandle TimerHandle2;
+		FTimerHandle TimerHandle;
+		FTimerHandle TimerHandle2;
 	void RotateToDirection(float dt, FVector direction, float Strength);
-	void GetAllBoids(bool recur);
+	void GetAllBoids();
 	void FireSequence(FVector CurrentLocation, FVector target);
 	TArray<ABoids*> AllBoids;
 	UPROPERTY(BlueprintReadWrite)
 		UParticleSystemComponent* BeamParticle;
+	
 };

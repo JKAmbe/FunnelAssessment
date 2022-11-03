@@ -11,6 +11,7 @@
 #include "Engine/World.h"
 #include "Runtime/AIModule/Classes/AIController.h"
 #include "AIController.h"
+#include "Net/UnrealNetwork.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 
@@ -26,6 +27,8 @@ ABoids::ABoids()
 	FollowStrength = 20.0f;
 	FireDuration = 0.1f;
 	CollisionAvoidanceStrength = 200.0f;
+
+	bReplicates = true;
 }
 
 // Called when the game starts or when spawned
@@ -33,8 +36,8 @@ void ABoids::BeginPlay()
 {
 	Super::BeginPlay();
 	SpawnDefaultController();
-	UE_LOG(LogTemp, Warning, TEXT("tests"))
-	GetAllBoids(true);
+	//UE_LOG(LogTemp, Warning, TEXT("tests"))
+	GetAllBoids();
 	MaxFlySpeedTMP = GetCharacterMovement()->MaxFlySpeed;
 	//UGameplayStatics::GetPlayerController(GetWorld(), 0)->LineOfSightTo(this, FVector(0,0,0), false);
 }
@@ -173,18 +176,18 @@ void ABoids::FireSequence(FVector CurrentLocation, FVector target)
 	UGameplayStatics::PlaySoundAtLocation(this, BeamSound, CurrentLocation);
 	BeamParticle->SetBeamTargetPoint(0, target, 0);
 	BeamParticle->SetVisibility(true);
-	
+
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()
 		{
 			GetCharacterMovement()->MaxFlySpeed = MaxFlySpeedTMP;
 			BeamParticle->SetVisibility(false);
-			//somehow this crashes it? //make except when follow target change reset the timer
 			GetWorld()->GetTimerManager().SetTimer(TimerHandle2, [&]()
 				{
 					bFireable = true;
 				}, UntilNextFire, false);
 		}, FireDuration, false);
-	
+
+	//ServerFireSequence(CurrentLocation, target);
 }
 
 void ABoids::RotateToDirection(float dt, FVector target, float Strength)
@@ -192,21 +195,20 @@ void ABoids::RotateToDirection(float dt, FVector target, float Strength)
 	SetActorRotation(FMath::RInterpConstantTo(GetActorRotation() , UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), target),dt, Strength));
 }
 
-void ABoids::GetAllBoids(bool recur)
+void ABoids::GetAllBoids()
 {
-	
-	AllBoids.Empty();
 	for (TActorIterator<ABoids> It(GetWorld()); It; ++It) {
 		AllBoids.Add(*It);
-		if (recur) {
-			UE_LOG(LogTemp, Warning, TEXT("test"))
-			It->GetAllBoids(false);
-		}
-			
+		It->AllBoids.Add(this);
 	}
 	AllBoids.Remove(this);
 }
 
+void ABoids::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ABoids, FollowTarget);
+}
 
 
 
