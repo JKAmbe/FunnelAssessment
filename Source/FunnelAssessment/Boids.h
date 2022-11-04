@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "EngineUtils.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "Boids.generated.h"
 
 UCLASS()
@@ -16,8 +17,7 @@ class FUNNELASSESSMENT_API ABoids : public ACharacter
 public:	
 	// Sets default values for this actor's properties
 	ABoids();
-	UPROPERTY(Replicated)
-		float MaxFlySpeedTMP;
+	float MaxFlySpeedTMP;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -35,10 +35,8 @@ public:
 		float LocalRadius;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		USoundBase* BeamSound;
-
 	UPROPERTY(Replicated,EditAnywhere, BlueprintReadWrite)
 		AActor* FollowTarget;
-
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		bool bFireable;
 	UPROPERTY(EditAnywhere, meta = (UIMin = 0.0f, UIMax = 5.0f, NoSpinbox = false))
