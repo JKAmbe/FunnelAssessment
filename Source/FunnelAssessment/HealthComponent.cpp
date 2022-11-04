@@ -46,6 +46,12 @@ void UHealthComponent::TakeDamage()
 {
 	CurrentHealth--;
 	APlayerController3DM* Owner = Cast<APlayerController3DM>(GetOwner());
+	if (Owner)
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("%s Health: %f"), *Owner->GetName(), CurrentHealth);
+		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("%s Health: %f"), *Owner->GetName(), CurrentHealth));
+	}
+
 	if (Owner && CurrentHealth <= 0.0f)
 	{
 		Owner->OnDeath();

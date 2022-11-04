@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
+#include "HealthComponent.h"
 #include "Boids.h"
 #include "PlayerController3DM.generated.h"
 
@@ -59,6 +60,7 @@ public:
 	void SetFunnelTarget();
 
 	void OnDeath();
+	void Respawn();
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -88,6 +90,7 @@ public:
 private:
 	UCameraComponent* Camera;
 	UCharacterMovementComponent* MoveComponent;
+	UHealthComponent* Health;
 
 	UPROPERTY(Replicated)
 		bool bBoostActive = false;
@@ -96,4 +99,6 @@ private:
 	float BoostCooldown = 1.0f;
 	float FunnelOffset = 500.0f;
 	float BoostSpeed;
+	float NormalFOV = 90.0f;
+	float BoostFOV = 100.0f;
 };

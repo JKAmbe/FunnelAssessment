@@ -16,4 +16,6 @@ class FUNNELASSESSMENT_API AMultiplayerGamemode : public AGameMode
 	
 public:
 	void PlayerDeath(AController* Controller);
+	UFUNCTION()
+		void PlayerRespawn(AController* Controller);
 };
