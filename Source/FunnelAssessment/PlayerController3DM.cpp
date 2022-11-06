@@ -35,7 +35,7 @@ void APlayerController3DM::BeginPlay()
 	SetTarget();
 
 	// Turn this off when in use
-	SpawnFunnels();
+	//SpawnFunnels();
 }
 
 // Called every frame
