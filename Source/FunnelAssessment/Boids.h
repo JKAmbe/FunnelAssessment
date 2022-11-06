@@ -8,6 +8,7 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Marker.h"
+#include "HealthComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Boids.generated.h"
 

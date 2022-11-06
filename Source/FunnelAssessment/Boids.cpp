@@ -173,28 +173,38 @@ void ABoids::AvoidCollision(float dt, float Strength, FVector CurrentLocation)
 	
 }
 
+
 void ABoids::FireSequence(FVector CurrentLocation, FVector target)
 {
-	bFireable = false;
-	UCharacterMovementComponent* Movement = GetCharacterMovement();
-	Movement->StopMovementImmediately();
-	Movement->MaxFlySpeed = 0;
-	SetActorRotation(UKismetMathLibrary::FindLookAtRotation(CurrentLocation, target));
-	UGameplayStatics::PlaySoundAtLocation(this, BeamSound, CurrentLocation);
-	BeamParticle->SetBeamTargetPoint(0, target, 0);
-	BeamParticle->SetVisibility(true);
-
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()
-		{
-			GetCharacterMovement()->MaxFlySpeed = MaxFlySpeedTMP;
-			BeamParticle->SetVisibility(false);
-			GetWorld()->GetTimerManager().SetTimer(TimerHandle2, [&]()
+	// Check if target exists first and if it has health so it doesnt keep shooting after its dead
+	if (FollowTarget)
+	{
+		// Take the healthcomponent and check if its not dead
+		/*UHealthComponent* TargetHealth = Cast<UHealthComponent>(FollowTarget->GetComponentByClass(UHealthComponent::StaticClass()));
+		if (TargetHealth && TargetHealth->CurrentHealth > 0)
+		{*/
+			bFireable = false;
+			UCharacterMovementComponent* Movement = GetCharacterMovement();
+			Movement->StopMovementImmediately();
+			Movement->MaxFlySpeed = 0;
+			SetActorRotation(UKismetMathLibrary::FindLookAtRotation(CurrentLocation, target));
+			UGameplayStatics::PlaySoundAtLocation(this, BeamSound, CurrentLocation);
+			BeamParticle->SetBeamTargetPoint(0, target, 0);
+			BeamParticle->SetVisibility(true);
+			// Deal damage to the target
+			//TargetHealth->TakeDamage();
+			GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()
 				{
-					bFireable = true;
-				}, UntilNextFire, false);
-		}, FireDuration, false);
-
-	//ServerFireSequence(CurrentLocation, target);
+					GetCharacterMovement()->MaxFlySpeed = MaxFlySpeedTMP;
+					BeamParticle->SetVisibility(false);
+					//somehow this crashes it? //make except when follow target change reset the timer
+					GetWorld()->GetTimerManager().SetTimer(TimerHandle2, [&]()
+						{
+							bFireable = true;
+						}, UntilNextFire, false);
+				}, FireDuration, false);
+		//}
+	}
 }
 
 void ABoids::RotateToDirection(float dt, FVector target, float Strength)
