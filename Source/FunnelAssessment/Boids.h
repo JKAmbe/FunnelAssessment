@@ -7,8 +7,13 @@
 #include "EngineUtils.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Marker.h"
+#include "Components/WidgetComponent.h"
 #include "Boids.generated.h"
 
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTarget2Delegate, ABoids*, Boid);
+//DECLARE_DYNAMIC_MULTICAST_DELEGATE(FTargetDelegate);
 UCLASS()
 class FUNNELASSESSMENT_API ABoids : public ACharacter
 {
@@ -63,5 +68,12 @@ public:
 	TArray<ABoids*> AllBoids;
 	UPROPERTY(BlueprintReadWrite)
 		UParticleSystemComponent* BeamParticle;
-	
+	UPROPERTY(BlueprintReadWrite)
+		UWidgetComponent* MarkerComponent;
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
+		FTarget2Delegate LockedOn;
+	UFUNCTION()
+		void Targetted();
+	//UPROPERTY(BlueprintAssignable, BlueprintCallable)
+	TScriptDelegate <FWeakObjectPtr>  TargettedDG;
 };

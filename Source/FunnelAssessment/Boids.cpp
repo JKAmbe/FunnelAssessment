@@ -39,7 +39,16 @@ void ABoids::BeginPlay()
 	//UE_LOG(LogTemp, Warning, TEXT("tests"))
 	GetAllBoids();
 	MaxFlySpeedTMP = GetCharacterMovement()->MaxFlySpeed;
-	//UGameplayStatics::GetPlayerController(GetWorld(), 0)->LineOfSightTo(this, FVector(0,0,0), false);
+
+
+	//new stufff
+	MarkerComponent = FindComponentByClass<UWidgetComponent>();
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("FindComponentByClass %s"), *MarkerComponent->GetName()));
+	UMarker* MarkerWidget = (UMarker*)MarkerComponent->GetWidget();
+	TargettedDG.BindUFunction(this, "Targetted");
+	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("%s"), *TargettedDG.GetFunctionName().ToString()));
+	
+	MarkerWidget->OnMarked.Add(TargettedDG);
 }
 
 // Called every frame
@@ -188,6 +197,12 @@ void ABoids::FireSequence(FVector CurrentLocation, FVector target)
 		}, FireDuration, false);
 
 	//ServerFireSequence(CurrentLocation, target);
+}
+
+void ABoids::Targetted()
+{
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("I did get called")));
+	LockedOn.Broadcast(this);
 }
 
 void ABoids::RotateToDirection(float dt, FVector target, float Strength)
