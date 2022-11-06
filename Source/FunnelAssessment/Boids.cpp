@@ -43,12 +43,11 @@ void ABoids::BeginPlay()
 
 	//new stufff
 	MarkerComponent = FindComponentByClass<UWidgetComponent>();
-	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("FindComponentByClass %s"), *MarkerComponent->GetName()));
 	UMarker* MarkerWidget = (UMarker*)MarkerComponent->GetWidget();
-	TargettedDG.BindUFunction(this, "Targetted");
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("%s"), *TargettedDG.GetFunctionName().ToString()));
-	
+
+	TargettedDG.BindUFunction(this, "Targetted");//bind delegate to function (i.e. the redline going backward in BP)
 	MarkerWidget->OnMarked.Add(TargettedDG);
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("%s"), *TargettedDG.GetFunctionName().ToString()));
 }
 
 // Called every frame
@@ -98,7 +97,6 @@ void ABoids::MoveForward()
 	AddMovementInput(GetActorForwardVector()*100.0f);
 	
 }
-
 
 void ABoids::Separation(float dt, TArray<ABoids*> LocalBoids, float Strength, FVector CurrentLocation)
 {
@@ -199,12 +197,6 @@ void ABoids::FireSequence(FVector CurrentLocation, FVector target)
 	//ServerFireSequence(CurrentLocation, target);
 }
 
-void ABoids::Targetted()
-{
-	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("I did get called")));
-	LockedOn.Broadcast(this);
-}
-
 void ABoids::RotateToDirection(float dt, FVector target, float Strength)
 {
 	SetActorRotation(FMath::RInterpConstantTo(GetActorRotation() , UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), target),dt, Strength));
@@ -217,6 +209,11 @@ void ABoids::GetAllBoids()
 		It->AllBoids.Add(this);
 	}
 	AllBoids.Remove(this);
+}
+
+void ABoids::Targetted()
+{
+	LockedOn.Broadcast(this); //A delegate Call
 }
 
 void ABoids::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const

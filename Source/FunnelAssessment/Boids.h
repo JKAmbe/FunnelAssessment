@@ -68,12 +68,13 @@ public:
 	TArray<ABoids*> AllBoids;
 	UPROPERTY(BlueprintReadWrite)
 		UParticleSystemComponent* BeamParticle;
+
+
 	UPROPERTY(BlueprintReadWrite)
 		UWidgetComponent* MarkerComponent;
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)
 		FTarget2Delegate LockedOn;
 	UFUNCTION()
 		void Targetted();
-	//UPROPERTY(BlueprintAssignable, BlueprintCallable)
 	TScriptDelegate <FWeakObjectPtr>  TargettedDG;
 };

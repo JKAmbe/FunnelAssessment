@@ -13,6 +13,7 @@ APlayerController3DM::APlayerController3DM()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	SetReplicates(true);
 }
 
 // Called when the game starts or when spawned
@@ -31,6 +32,7 @@ void APlayerController3DM::BeginPlay()
 	// Set the opponent as target and spawn funnels
 	SetTarget();
 	//SpawnFunnels();
+	
 }
 
 // Called every frame
