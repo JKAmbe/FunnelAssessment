@@ -11,8 +11,7 @@
 #include "Engine/World.h"
 #include "Runtime/AIModule/Classes/AIController.h"
 #include "AIController.h"
-#include "HealthComponent.h"
-#include "PlayerController3DM.h"
+#include "Net/UnrealNetwork.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 
@@ -28,6 +27,8 @@ ABoids::ABoids()
 	FollowStrength = 20.0f;
 	FireDuration = 0.1f;
 	CollisionAvoidanceStrength = 200.0f;
+
+	bReplicates = true;
 }
 
 // Called when the game starts or when spawned
@@ -35,10 +36,18 @@ void ABoids::BeginPlay()
 {
 	Super::BeginPlay();
 	SpawnDefaultController();
-	UE_LOG(LogTemp, Warning, TEXT("tests"))
-	GetAllBoids(true);
+	//UE_LOG(LogTemp, Warning, TEXT("tests"))
+	GetAllBoids();
 	MaxFlySpeedTMP = GetCharacterMovement()->MaxFlySpeed;
-	//UGameplayStatics::GetPlayerController(GetWorld(), 0)->LineOfSightTo(this, FVector(0,0,0), false);
+
+
+	//new stufff
+	MarkerComponent = FindComponentByClass<UWidgetComponent>();
+	UMarker* MarkerWidget = (UMarker*)MarkerComponent->GetWidget();
+
+	TargettedDG.BindUFunction(this, "Targetted");//bind delegate to function (i.e. the redline going backward in BP)
+	MarkerWidget->OnMarked.Add(TargettedDG);
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("%s"), *TargettedDG.GetFunctionName().ToString()));
 }
 
 // Called every frame
@@ -70,15 +79,10 @@ void ABoids::Tick(float DeltaTime)
 	//Obstacle Avoidance and target follow
 	if (FollowTarget)
 	{
-		// Follow target only when it can get a lock
-		if (!Cast<APlayerController3DM>(FollowTarget)->bPreventLockon)
-		{
-			FlyToTarget(DeltaTime, FollowTarget->GetActorLocation(), bFireable ? FollowStrength : 1.0f, CurrentPosition);
-			if ((FollowTarget->GetActorLocation() - CurrentPosition).IsNearlyZero(LocalRadius) && bFireable == true) {
-				FireSequence(CurrentPosition, FollowTarget->GetActorLocation());
-			}
+		FlyToTarget(DeltaTime, FollowTarget->GetActorLocation(), bFireable ? FollowStrength:1.0f, CurrentPosition);
+		if ((FollowTarget->GetActorLocation() - CurrentPosition).IsNearlyZero(LocalRadius) && bFireable == true) {
+			FireSequence(CurrentPosition, FollowTarget->GetActorLocation());
 		}
-
 	}
 		
 	AvoidCollision(DeltaTime, CollisionAvoidanceStrength, CurrentPosition);
@@ -93,7 +97,6 @@ void ABoids::MoveForward()
 	AddMovementInput(GetActorForwardVector()*100.0f);
 	
 }
-
 
 void ABoids::Separation(float dt, TArray<ABoids*> LocalBoids, float Strength, FVector CurrentLocation)
 {
@@ -172,35 +175,26 @@ void ABoids::AvoidCollision(float dt, float Strength, FVector CurrentLocation)
 
 void ABoids::FireSequence(FVector CurrentLocation, FVector target)
 {
-	// Check if target exists first and if it has health so it doesnt keep shooting after its dead
-	if (FollowTarget)
-	{
-		// Take the healthcomponent and check if its not dead
-		UHealthComponent* TargetHealth = Cast<UHealthComponent>(FollowTarget->GetComponentByClass(UHealthComponent::StaticClass()));
-		if (TargetHealth && TargetHealth->CurrentHealth > 0)
+	bFireable = false;
+	UCharacterMovementComponent* Movement = GetCharacterMovement();
+	Movement->StopMovementImmediately();
+	Movement->MaxFlySpeed = 0;
+	SetActorRotation(UKismetMathLibrary::FindLookAtRotation(CurrentLocation, target));
+	UGameplayStatics::PlaySoundAtLocation(this, BeamSound, CurrentLocation);
+	BeamParticle->SetBeamTargetPoint(0, target, 0);
+	BeamParticle->SetVisibility(true);
+
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()
 		{
-			bFireable = false;
-			UCharacterMovementComponent* Movement = GetCharacterMovement();
-			Movement->StopMovementImmediately();
-			Movement->MaxFlySpeed = 0;
-			SetActorRotation(UKismetMathLibrary::FindLookAtRotation(CurrentLocation, target));
-			UGameplayStatics::PlaySoundAtLocation(this, BeamSound, CurrentLocation);
-			BeamParticle->SetBeamTargetPoint(0, target, 0);
-			BeamParticle->SetVisibility(true);
-			// Deal damage to the target
-			TargetHealth->TakeDamage();
-			GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()
+			GetCharacterMovement()->MaxFlySpeed = MaxFlySpeedTMP;
+			BeamParticle->SetVisibility(false);
+			GetWorld()->GetTimerManager().SetTimer(TimerHandle2, [&]()
 				{
-					GetCharacterMovement()->MaxFlySpeed = MaxFlySpeedTMP;
-					BeamParticle->SetVisibility(false);
-					//somehow this crashes it? //make except when follow target change reset the timer
-					GetWorld()->GetTimerManager().SetTimer(TimerHandle2, [&]()
-						{
-							bFireable = true;
-						}, UntilNextFire, false);
-				}, FireDuration, false);
-		}
-	}
+					bFireable = true;
+				}, UntilNextFire, false);
+		}, FireDuration, false);
+
+	//ServerFireSequence(CurrentLocation, target);
 }
 
 void ABoids::RotateToDirection(float dt, FVector target, float Strength)
@@ -208,21 +202,25 @@ void ABoids::RotateToDirection(float dt, FVector target, float Strength)
 	SetActorRotation(FMath::RInterpConstantTo(GetActorRotation() , UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), target),dt, Strength));
 }
 
-void ABoids::GetAllBoids(bool recur)
+void ABoids::GetAllBoids()
 {
-	
-	AllBoids.Empty();
 	for (TActorIterator<ABoids> It(GetWorld()); It; ++It) {
 		AllBoids.Add(*It);
-		if (recur) {
-			UE_LOG(LogTemp, Warning, TEXT("test"))
-			It->GetAllBoids(false);
-		}
-			
+		It->AllBoids.Add(this);
 	}
 	AllBoids.Remove(this);
 }
 
+void ABoids::Targetted()
+{
+	LockedOn.Broadcast(this); //A delegate Call
+}
+
+void ABoids::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ABoids, FollowTarget);
+}
 
 
 
