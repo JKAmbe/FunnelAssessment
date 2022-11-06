@@ -6,7 +6,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/GameState.h"
 #include "GameFramework/PlayerState.h"
-#include "MultiplayerGamemode.h"
 #include "Components/InputComponent.h"
 
 // Sets default values
@@ -14,6 +13,7 @@ APlayerController3DM::APlayerController3DM()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	SetReplicates(true);
 }
 
 // Called when the game starts or when spawned
@@ -23,8 +23,6 @@ void APlayerController3DM::BeginPlay()
 	
 
 	Camera = FindComponentByClass<UCameraComponent>();
-	Health = FindComponentByClass<UHealthComponent>();
-
 	bUseControllerRotationPitch = true;
 
 	// set the movement component and update the movement to the custom variables
@@ -33,9 +31,8 @@ void APlayerController3DM::BeginPlay()
 
 	// Set the opponent as target and spawn funnels
 	SetTarget();
-
-	// Turn this off when in use
-	SpawnFunnels();
+	//SpawnFunnels();
+	
 }
 
 // Called every frame
@@ -58,7 +55,6 @@ void APlayerController3DM::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 
 	DOREPLIFETIME(APlayerController3DM, bBoostActive);
 	DOREPLIFETIME(APlayerController3DM, Funnels);
-	DOREPLIFETIME(APlayerController3DM, bPreventLockon);
 }
 
 // setting player movement
@@ -151,9 +147,9 @@ void APlayerController3DM::BoostCheck()
 		{
 			if (BoostTime < MaxBoostDuration)
 			{
-				BoostTime += (GetWorld()->GetDeltaSeconds())/2;
+				BoostTime += GetWorld()->GetDeltaSeconds();
 				MoveComponent->MaxFlySpeed = BoostSpeed;
-				//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("%f"), (BoostTime / MaxBoostDuration) * 100));
+				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("%f"), (BoostTime / MaxBoostDuration) * 100));
 			}
 			// force cooldown when boost is used up
 			if (BoostTime >= MaxBoostDuration)
@@ -173,7 +169,7 @@ void APlayerController3DM::BoostCheck()
 		if (BoostTime > 0.0f)
 		{
 			BoostTime -= GetWorld()->GetDeltaSeconds();
-			//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("%f"), (BoostTime / MaxBoostDuration) * 100));
+			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("%f"), (BoostTime / MaxBoostDuration) * 100));
 		}
 		// allow player to boost again/reset cooldown if the boost is fully recovered
 		if (BoostTime <= 0.0f)
@@ -191,14 +187,12 @@ void APlayerController3DM::BoostCheck2()
 	{
 		if (BoostTime < MaxBoostDuration)
 		{
-			// Increase FOV for better emphasis
-			Camera->SetFieldOfView(BoostFOV);
 			BoostTime += GetWorld()->GetDeltaSeconds();
 			MoveComponent->MaxFlySpeed = BoostSpeed;
+			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("%f"), (BoostTime / MaxBoostDuration) * 100));
 			// force turn off boost when max duration is met
 			if (BoostTime >= MaxBoostDuration)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("No boost fuel")));
 				bBoostActive = false;
 			}
 		}
@@ -206,22 +200,13 @@ void APlayerController3DM::BoostCheck2()
 	// Restore BoostTime when player is not using boost
 	if (!bBoostActive)
 	{
-		// Reset FOV back to normal
-		Camera->SetFieldOfView(NormalFOV);
 		MoveComponent->MaxFlySpeed = FlySpeed;
 		if (BoostTime > 0.0f)
 		{
 			BoostTime -= GetWorld()->GetDeltaSeconds();
+			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("%f"), (BoostTime / MaxBoostDuration) * 100));
 		}
-
 	}
-	LockonCheck();
-}
-
-// turn bPreventLockon depending on if the player is boosting or not
-void APlayerController3DM::LockonCheck()
-{
-	bPreventLockon = bBoostActive;
 }
 
 void APlayerController3DM::BoostOn()
@@ -308,25 +293,5 @@ void APlayerController3DM::SetFunnelTarget()
 				Funnels[i]->FollowTarget = FunnelTarget;
 			}
 		}
-	}
-}
-
-// Call the gamemode function to delete this character
-void APlayerController3DM::OnDeath()
-{
-	AMultiplayerGamemode* Gamemode = Cast<AMultiplayerGamemode>(GetWorld()->GetAuthGameMode());
-	if (Gamemode)
-	{
-		Gamemode->PlayerDeath(GetController());
-	}
-}
-
-
-// Reset health back to maxHealth when the player respawns, called by multiplayergamemode
-void APlayerController3DM::Respawn()
-{
-	if (Health)
-	{
-		Health->CurrentHealth = Health->MaxHealth;
 	}
 }
