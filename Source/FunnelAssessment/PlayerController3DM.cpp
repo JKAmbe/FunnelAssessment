@@ -5,6 +5,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/GameState.h"
+#include "PlayerHUD.h"
 #include "GameFramework/PlayerState.h"
 #include "MultiplayerGamemode.h"
 #include "Components/InputComponent.h"
@@ -216,6 +217,16 @@ void APlayerController3DM::BoostCheck2()
 
 	}
 	LockonCheck();
+
+	// Get and update the HUD
+	if (IsLocallyControlled())
+	{
+		APlayerHUD* PlayerHUD = Cast<APlayerHUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD());
+		if (PlayerHUD)
+		{
+			PlayerHUD->SetBoostbarAmt((MaxBoostDuration - BoostTime) / MaxBoostDuration);
+		}
+	}
 }
 
 // turn bPreventLockon depending on if the player is boosting or not
