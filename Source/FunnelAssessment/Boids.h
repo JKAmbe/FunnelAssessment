@@ -6,14 +6,8 @@
 #include "GameFramework/Character.h"
 #include "EngineUtils.h"
 #include "Particles/ParticleSystemComponent.h"
-#include "Net/UnrealNetwork.h"
-#include "Marker.h"
-#include "Components/WidgetComponent.h"
 #include "Boids.generated.h"
 
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTarget2Delegate, ABoids*, Boid);
-//DECLARE_DYNAMIC_MULTICAST_DELEGATE(FTargetDelegate);
 UCLASS()
 class FUNNELASSESSMENT_API ABoids : public ACharacter
 {
@@ -40,7 +34,7 @@ public:
 		float LocalRadius;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		USoundBase* BeamSound;
-	UPROPERTY(Replicated,EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		AActor* FollowTarget;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		bool bFireable;
@@ -60,21 +54,12 @@ public:
 		float CollisionAvoidanceStrength;
 	UPROPERTY(EditAnywhere, meta = (UIMin = 0.0f, UIMax = 1000.0f, NoSpinbox = false))
 		float AvoidanceDistanceRange;
-		FTimerHandle TimerHandle;
-		FTimerHandle TimerHandle2;
+	FTimerHandle TimerHandle;
+	FTimerHandle TimerHandle2;
 	void RotateToDirection(float dt, FVector direction, float Strength);
-	void GetAllBoids();
+	void GetAllBoids(bool recur);
 	void FireSequence(FVector CurrentLocation, FVector target);
 	TArray<ABoids*> AllBoids;
 	UPROPERTY(BlueprintReadWrite)
 		UParticleSystemComponent* BeamParticle;
-
-
-	UPROPERTY(BlueprintReadWrite)
-		UWidgetComponent* MarkerComponent;
-	UPROPERTY(BlueprintAssignable, BlueprintCallable)
-		FTarget2Delegate LockedOn;
-	UFUNCTION()
-		void Targetted();
-	TScriptDelegate <FWeakObjectPtr>  TargettedDG;
 };
