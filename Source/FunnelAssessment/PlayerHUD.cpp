@@ -8,7 +8,7 @@
 
 APlayerHUD::APlayerHUD()
 {
-	static ConstructorHelpers::FClassFinder<UUserWidget> PlayerHUDObject(TEXT("/Game/PlayerController/Blueprint/PlayerHUDWidget"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> PlayerHUDObject(TEXT("/Game/Widget/PlayerHUDWidget"));
 	PlayerHUDClass = PlayerHUDObject.Class;
 
 	if (PlayerHUDClass)

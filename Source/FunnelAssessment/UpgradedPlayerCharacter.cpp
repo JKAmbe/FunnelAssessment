@@ -50,8 +50,11 @@ void AUpgradedPlayerCharacter::ChangeOwnership_Implementation(ABoids* Boid)
 {
 	for (AUpgradedPlayerCharacter* Enemy : OtherPlayers)
 	{
-		Enemy->ControlledBoids.Remove(Boid);
-		UpdateUIOverride(this, Boid);
+		if (Enemy)
+		{
+			Enemy->ControlledBoids.Remove(Boid);
+			UpdateUIOverride(this, Boid);
+		}
 	}
 }
 
