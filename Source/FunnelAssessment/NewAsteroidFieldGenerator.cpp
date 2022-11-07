@@ -57,7 +57,8 @@ void ANewAsteroidFieldGenerator::GenerateAsteroidField()
 		if (Asteroid) {
 			
 			AActor* tmp = GetWorld()->SpawnActor<AActor>(Asteroid, RandPoint, UKismetMathLibrary::RandomRotator());
-			tmp->SetActorScale3D(FVector(AsteroidSize) + FVector(FMath::RandRange(-AsteroidSizeVariation, AsteroidSizeVariation), FMath::RandRange(-AsteroidSizeVariation, AsteroidSizeVariation), FMath::RandRange(-AsteroidSizeVariation, AsteroidSizeVariation)));
+			tmp->SetActorScale3D(FVector(AsteroidSize) + FVector(FMath::RandRange(-AsteroidSizeVariation, AsteroidSizeVariation),
+				FMath::RandRange(-AsteroidSizeVariation, AsteroidSizeVariation), FMath::RandRange(-AsteroidSizeVariation, AsteroidSizeVariation)));
 			//tmp->SetActorScale3D(FVector(FMath::RandRange(1.0f, 10.0f), FMath::RandRange(1.0f, 10.0f), FMath::RandRange(1.0f, 10.0f)));
 			AsteroidList.Add(tmp);
 		}
