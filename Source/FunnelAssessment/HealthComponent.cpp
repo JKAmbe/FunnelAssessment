@@ -47,22 +47,25 @@ void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 void UHealthComponent::TakeDamage()
 {
+	// reduce the player's health and call to update the healthbar
 	CurrentHealth--;
 	UpdateHealthbar();
-
 	APlayerController3DM* Owner = Cast<APlayerController3DM>(GetOwner());
-	if (Owner)
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("%s Health: %f"), *Owner->GetName(), CurrentHealth);
-		//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("%s Health: %f"), *Owner->GetName(), CurrentHealth));
-	}
+	// There's a healthbar so this bit is unnecessary now
+	//if (Owner)
+	//{
+	//	//UE_LOG(LogTemp, Warning, TEXT("%s Health: %f"), *Owner->GetName(), CurrentHealth);
+	//	//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("%s Health: %f"), *Owner->GetName(), CurrentHealth));
+	//}
 
+	// call OnDeath if player runs out of health
 	if (Owner && CurrentHealth <= 0.0f)
 	{
 		Owner->OnDeath();
 	}	
 }
 
+// Update the player's health bar
 void UHealthComponent::UpdateHealthbar()
 {
 	if (Cast<APawn>(GetOwner())->IsLocallyControlled())

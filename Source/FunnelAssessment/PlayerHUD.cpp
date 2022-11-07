@@ -8,9 +8,11 @@
 
 APlayerHUD::APlayerHUD()
 {
+	// Set playerhudClass
 	static ConstructorHelpers::FClassFinder<UUserWidget> PlayerHUDObject(TEXT("/Game/Widget/PlayerHUDWidget"));
 	PlayerHUDClass = PlayerHUDObject.Class;
 
+	// Add player's HUD to viewport
 	if (PlayerHUDClass)
 	{
 		PlayerHUDWidget = CreateWidget<UUserWidget>(GetWorld(), PlayerHUDClass);
@@ -19,6 +21,7 @@ APlayerHUD::APlayerHUD()
 			PlayerHUDWidget->AddToViewport();
 		}
 	}
+	// Set Healthbar and Boostbar vars
 	if (PlayerHUDWidget)
 	{
 		HealthBar = Cast<UProgressBar>(PlayerHUDWidget->GetWidgetFromName(TEXT("HealthBar")));
@@ -26,6 +29,7 @@ APlayerHUD::APlayerHUD()
 	}
 }
 
+// Set health bar
 void APlayerHUD::SetHealthbarAmt(float Percent)
 {
 	if (HealthBar)
@@ -34,6 +38,7 @@ void APlayerHUD::SetHealthbarAmt(float Percent)
 	}
 }
 
+// Set boost bar
 void APlayerHUD::SetBoostbarAmt(float Percent)
 {
 	if (BoostBar)

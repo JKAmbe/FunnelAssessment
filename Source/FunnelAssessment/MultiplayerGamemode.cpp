@@ -5,6 +5,7 @@
 #include "PlayerController3DM.h"
 #include "TimerManager.h"
 
+// Call from playercharacter when theyre dead
 void AMultiplayerGamemode::PlayerDeath(AController* Controller)
 {
 	if (Controller)
@@ -21,6 +22,8 @@ void AMultiplayerGamemode::PlayerDeath(AController* Controller)
 	}
 }
 
+
+// Spawn the player again and call the Respawn() function
 void AMultiplayerGamemode::PlayerRespawn(AController* Controller)
 {
 	if (Controller)

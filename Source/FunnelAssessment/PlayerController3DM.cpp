@@ -23,6 +23,7 @@ void APlayerController3DM::BeginPlay()
 	Super::BeginPlay();
 	
 
+	// Set camera and health components
 	Camera = FindComponentByClass<UCameraComponent>();
 	Health = FindComponentByClass<UHealthComponent>();
 
@@ -148,44 +149,44 @@ void APlayerController3DM::LookY(float val)
 // NOT USED
 void APlayerController3DM::BoostCheck()
 {
-	// boost if players is not on a cooldown
-	if (bBoostActive)
-	{
-		if (!bBoostCooldown)
-		{
-			if (BoostTime < MaxBoostDuration)
-			{
-				BoostTime += (GetWorld()->GetDeltaSeconds())/2;
-				MoveComponent->MaxFlySpeed = BoostSpeed;
-				//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("%f"), (BoostTime / MaxBoostDuration) * 100));
-			}
-			// force cooldown when boost is used up
-			if (BoostTime >= MaxBoostDuration)
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("No boost fuel")));
-				bBoostActive = false;
-				bBoostCooldown = true;
-			}
-		}
-	}
+	//// boost if players is not on a cooldown
+	//if (bBoostActive)
+	//{
+	//	if (!bBoostCooldown)
+	//	{
+	//		if (BoostTime < MaxBoostDuration)
+	//		{
+	//			BoostTime += (GetWorld()->GetDeltaSeconds())/2;
+	//			MoveComponent->MaxFlySpeed = BoostSpeed;
+	//			//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, FString::Printf(TEXT("%f"), (BoostTime / MaxBoostDuration) * 100));
+	//		}
+	//		// force cooldown when boost is used up
+	//		if (BoostTime >= MaxBoostDuration)
+	//		{
+	//			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("No boost fuel")));
+	//			bBoostActive = false;
+	//			bBoostCooldown = true;
+	//		}
+	//	}
+	//}
 
-	// restore boost when inactive
-	if (!bBoostActive)
-	{
-		MoveComponent->MaxFlySpeed = FlySpeed;
-		// restore boost when player is not using boost
-		if (BoostTime > 0.0f)
-		{
-			BoostTime -= GetWorld()->GetDeltaSeconds();
-			//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("%f"), (BoostTime / MaxBoostDuration) * 100));
-		}
-		// allow player to boost again/reset cooldown if the boost is fully recovered
-		if (BoostTime <= 0.0f)
-		{
-			BoostTime = 0.0f;
-			bBoostCooldown = false;
-		}
-	}
+	//// restore boost when inactive
+	//if (!bBoostActive)
+	//{
+	//	MoveComponent->MaxFlySpeed = FlySpeed;
+	//	// restore boost when player is not using boost
+	//	if (BoostTime > 0.0f)
+	//	{
+	//		BoostTime -= GetWorld()->GetDeltaSeconds();
+	//		//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("%f"), (BoostTime / MaxBoostDuration) * 100));
+	//	}
+	//	// allow player to boost again/reset cooldown if the boost is fully recovered
+	//	if (BoostTime <= 0.0f)
+	//	{
+	//		BoostTime = 0.0f;
+	//		bBoostCooldown = false;
+	//	}
+	//}
 }
 
 void APlayerController3DM::BoostCheck2()
@@ -219,6 +220,7 @@ void APlayerController3DM::BoostCheck2()
 		}
 
 	}
+	// Allow/Prevent lockon if the player is boosting
 	LockonCheck();
 
 	// Get and update the HUD
