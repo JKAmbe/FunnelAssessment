@@ -177,11 +177,11 @@ void ABoids::AvoidCollision(float dt, float Strength, FVector CurrentLocation)
 void ABoids::FireSequence(FVector CurrentLocation, FVector target)
 {
 	// Check if target exists first and if it has health so it doesnt keep shooting after its dead
-	if (FollowTarget)
+	//if (FollowTarget)
 	{
 		// Take the healthcomponent and check if its not dead
-		UHealthComponent* TargetHealth = Cast<UHealthComponent>(FollowTarget->GetComponentByClass(UHealthComponent::StaticClass()));
-		if (TargetHealth && TargetHealth->CurrentHealth > 0)
+		//UHealthComponent* TargetHealth = Cast<UHealthComponent>(FollowTarget->GetComponentByClass(UHealthComponent::StaticClass()));
+		//if (TargetHealth && TargetHealth->CurrentHealth > 0)
 		{
 			bFireable = false;
 			UCharacterMovementComponent* Movement = GetCharacterMovement();
@@ -192,7 +192,7 @@ void ABoids::FireSequence(FVector CurrentLocation, FVector target)
 			BeamParticle->SetBeamTargetPoint(0, target, 0);
 			BeamParticle->SetVisibility(true);
 			// Deal damage to the target
-			TargetHealth->TakeDamage();
+			//TargetHealth->TakeDamage();
 			GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&]()
 				{
 					GetCharacterMovement()->MaxFlySpeed = MaxFlySpeedTMP;

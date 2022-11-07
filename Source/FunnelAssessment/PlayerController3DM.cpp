@@ -126,20 +126,23 @@ void APlayerController3DM::LookX(float val)
 
 void APlayerController3DM::LookY(float val)
 {
-	FRotator LookUpRotation = FRotator::ZeroRotator;
-	LookUpRotation.Pitch = val;
-	if (Camera)
-	{
-		if (abs(Camera->GetRelativeRotation().Pitch + LookUpRotation.Pitch >= 90.0f)) {
+	// Rotating the whole player looks better in implementation
+	AddControllerPitchInput(-val);
 
-			return;
-		}
-		Camera->AddRelativeRotation(LookUpRotation);
-		FRotator RelativeRotation = Camera->GetRelativeRotation();
-		RelativeRotation.Yaw = 0.0f;
-		RelativeRotation.Roll = 0.0f;
-		Camera->SetRelativeRotation(RelativeRotation);
-	}
+	//FRotator LookUpRotation = FRotator::ZeroRotator;
+	//LookUpRotation.Pitch = val;
+	//if (Camera)
+	//{
+	//	if (abs(Camera->GetRelativeRotation().Pitch + LookUpRotation.Pitch >= 90.0f)) {
+
+	//		return;
+	//	}
+	//	Camera->AddRelativeRotation(LookUpRotation);
+	//	FRotator RelativeRotation = Camera->GetRelativeRotation();
+	//	RelativeRotation.Yaw = 0.0f;
+	//	RelativeRotation.Roll = 0.0f;
+	//	Camera->SetRelativeRotation(RelativeRotation);
+	//}
 }
 
 // NOT USED
