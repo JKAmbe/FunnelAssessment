@@ -23,25 +23,12 @@ class FUNNELASSESSMENT_API ABoids : public ACharacter
 public:	
 	// Sets default values for this actor's properties
 	ABoids();
-	float MaxFlySpeedTMP;
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-	void MoveForward();
-	void Separation(float dt, TArray<ABoids*> LocalBoids, float Strength, FVector CurrentLocation);
-	void Alignment(float dt, TArray<ABoids*> LocalBoids, float Strength, FVector CurrentLocation);
-	void Cohesion(float dt, TArray<ABoids*> LocalBoids, float Strength, FVector CurrentLocation);
-	void FlyToTarget(float dt, FVector target, float Strength, FVector CurrentLocation);
-	void AvoidCollision(float dt, float Strength, FVector CurrentLocation);
+	//variables editable in editor 
 	UPROPERTY(EditAnywhere)
 		float LocalRadius;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		USoundBase* BeamSound;
-	UPROPERTY(Replicated,EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 		AActor* FollowTarget;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		bool bFireable;
@@ -49,11 +36,11 @@ public:
 		float UntilNextFire;
 	UPROPERTY(EditAnywhere, meta = (UIMin = 0.0f, UIMax = 1.0f, NoSpinbox = false))
 		float FireDuration;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=( UIMin = 1.0f, UIMax = 200.0f, ClampMin = 1.0f,NoSpinbox = false))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (UIMin = 1.0f, UIMax = 200.0f, ClampMin = 1.0f, NoSpinbox = false))
 		float SeperationStrength;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (UIMin = 1.0f, UIMax = 200.0f, ClampMin = 1.0f, NoSpinbox = false))
 		float AlignmentStrength;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite,  meta = (UIMin = 1.0f, UIMax = 200.0f, ClampMin = 1.0f, NoSpinbox = false))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (UIMin = 1.0f, UIMax = 200.0f, ClampMin = 1.0f, NoSpinbox = false))
 		float CohesionStrength;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (UIMin = 0.0f, UIMax = 5.0f, NoSpinbox = false))
 		float FollowStrength;
@@ -61,16 +48,38 @@ public:
 		float CollisionAvoidanceStrength;
 	UPROPERTY(EditAnywhere, meta = (UIMin = 0.0f, UIMax = 1000.0f, NoSpinbox = false))
 		float AvoidanceDistanceRange;
-		FTimerHandle TimerHandle;
-		FTimerHandle TimerHandle2;
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+public:	
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	//Movevent funciton
+	void MoveForward();
+	void Separation(float dt, TArray<ABoids*> LocalBoids, float Strength, FVector CurrentLocation);
+	void Alignment(float dt, TArray<ABoids*> LocalBoids, float Strength, FVector CurrentLocation);
+	void Cohesion(float dt, TArray<ABoids*> LocalBoids, float Strength, FVector CurrentLocation);
+	void FlyToTarget(float dt, FVector target, float Strength, FVector CurrentLocation);
+	void AvoidCollision(float dt, float Strength, FVector CurrentLocation);
+	
+	//timer
+	FTimerHandle TimerHandle;
+	FTimerHandle TimerHandle2;
+
+	//helper method
 	void RotateToDirection(float dt, FVector direction, float Strength);
 	void GetAllBoids();
+
+	//firing behaviour
 	void FireSequence(FVector CurrentLocation, FVector target);
 	TArray<ABoids*> AllBoids;
 	UPROPERTY(BlueprintReadWrite)
 		UParticleSystemComponent* BeamParticle;
+	float MaxFlySpeedTMP;
 
-
+	//delegates and widget logic
 	UPROPERTY(BlueprintReadWrite)
 		UWidgetComponent* MarkerComponent;
 	UPROPERTY(BlueprintAssignable, BlueprintCallable)

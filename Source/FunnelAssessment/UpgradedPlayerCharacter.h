@@ -21,8 +21,7 @@ class FUNNELASSESSMENT_API AUpgradedPlayerCharacter : public APlayerController3D
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void Tick(float Del) override;
 public:
-	//Custom Event
-	//AUpgradedPlayerCharacter::AUpgradedPlayerCharacter();
+	//Custom Events eitehr called in server or as multicast
 	UFUNCTION(Server, Reliable)
 		void ChangeOwnership(ABoids* Boid);
 	UFUNCTION(Server, Reliable)

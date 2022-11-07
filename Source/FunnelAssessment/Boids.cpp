@@ -41,14 +41,12 @@ void ABoids::BeginPlay()
 	GetAllBoids();
 	MaxFlySpeedTMP = GetCharacterMovement()->MaxFlySpeed;
 
-
-	//new stufff
+	//get the marker Widget Component
 	MarkerComponent = FindComponentByClass<UWidgetComponent>();
 	UMarker* MarkerWidget = (UMarker*)MarkerComponent->GetWidget();
 
 	TargettedDG.BindUFunction(this, "Targetted");//bind delegate to function (i.e. the redline going backward in BP)
-	MarkerWidget->OnMarked.Add(TargettedDG);
-	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("%s"), *TargettedDG.GetFunctionName().ToString()));
+	MarkerWidget->OnMarked.Add(TargettedDG);//bind the 'Onmarked' from widget component call to Targetted Delegate
 }
 
 // Called every frame
@@ -68,37 +66,36 @@ void ABoids::Tick(float DeltaTime)
 		}
 
 	}
-	//base boids behaviour, Seperation, Alignement, Cohesion
-	/*Separation(DeltaTime, LocalBoids, bFireable? SeperationStrength : 1.0f, CurrentPosition);
-	Alignment(DeltaTime, LocalBoids, bFireable ? AlignmentStrength : 1.0f, CurrentPosition);
-	Cohesion(DeltaTime, LocalBoids, bFireable ? CohesionStrength : 1.0f, CurrentPosition);*/
 
+	//base boids behaviour, Seperation, Alignement, Cohesion
 	Separation(DeltaTime, LocalBoids, SeperationStrength, CurrentPosition);
 	Alignment(DeltaTime, LocalBoids, AlignmentStrength, CurrentPosition);
 	Cohesion(DeltaTime, LocalBoids,  CohesionStrength, CurrentPosition);
-
 	//Obstacle Avoidance and target follow
 	if (FollowTarget)
 	{
 		FlyToTarget(DeltaTime, FollowTarget->GetActorLocation(), bFireable ? FollowStrength:1.0f, CurrentPosition);
-		if ((FollowTarget->GetActorLocation() - CurrentPosition).IsNearlyZero(LocalRadius) && bFireable == true) {
+		if ((FollowTarget->GetActorLocation() - CurrentPosition).IsNearlyZero(LocalRadius) && bFireable == true)
 			FireSequence(CurrentPosition, FollowTarget->GetActorLocation());
-		}
 	}
-		
 	AvoidCollision(DeltaTime, CollisionAvoidanceStrength, CurrentPosition);
-	//AvoidCollision(DeltaTime, bFireable ? CollisionAvoidanceStrength : 1.0f, CurrentPosition);
-	//Move forward, Direction(rotation) is decided by other behaviour
+
+	//Move forward based on the direction decided by methods above
 	MoveForward();
-	//UE_LOG(LogTemp,Warning, TEXT("%f"), (float)bFireable)
 }
 
+/// <summary>
+/// Move Forward based on Boid's forward vector
+/// </summary>
 void ABoids::MoveForward()
 {
 	AddMovementInput(GetActorForwardVector()*100.0f);
 	
 }
 
+/// <summary>
+/// Boids will try to move away from other neaby boids
+/// </summary>
 void ABoids::Separation(float dt, TArray<ABoids*> LocalBoids, float Strength, FVector CurrentLocation)
 {
 	for (ABoids* boid : LocalBoids) {
@@ -106,7 +103,9 @@ void ABoids::Separation(float dt, TArray<ABoids*> LocalBoids, float Strength, FV
 		RotateToDirection(dt, oppositeOfBoid, Strength);
 	}
 }
-
+/// <summary>
+/// Boids will try to move together with other boids, I.e. follow their direction
+/// </summary>
 void ABoids::Alignment(float dt, TArray<ABoids*> LocalBoids, float Strength, FVector CurrentLocation)
 {
 	FVector AverageDirection = FVector(0, 0, 0);
@@ -119,6 +118,9 @@ void ABoids::Alignment(float dt, TArray<ABoids*> LocalBoids, float Strength, FVe
 		
 }
 
+/// <summary>
+/// Boids will try to move close to each other, essentially the reverse of Seperation
+/// </summary>
 void ABoids::Cohesion(float dt, TArray<ABoids*> LocalBoids, float Strength, FVector CurrentLocation)
 {
 	FVector AveragePosition = FVector(0, 0, 0);
@@ -131,11 +133,17 @@ void ABoids::Cohesion(float dt, TArray<ABoids*> LocalBoids, float Strength, FVec
 	}
 }
 
+/// <summary>
+/// The Target the boid will follow, Essentially the Cohesion logic but applied to an outside object
+/// </summary>
 void ABoids::FlyToTarget(float dt, FVector target, float Strength, FVector CurrentLocation)
 {
 	RotateToDirection(dt,  target, Strength);
 }
 
+/// <summary>
+/// Boids logic to avoid collision with dynamic object, uses raycast
+/// </summary>
 void ABoids::AvoidCollision(float dt, float Strength, FVector CurrentLocation)
 {
 	FHitResult OutHit;
@@ -174,7 +182,9 @@ void ABoids::AvoidCollision(float dt, float Strength, FVector CurrentLocation)
 	
 }
 
-
+/// <summary>
+/// Sequence of beahviour that will perform the action 'fire'
+/// </summary>
 void ABoids::FireSequence(FVector CurrentLocation, FVector target)
 {
 	// Check if target exists first and if it has health so it doesnt keep shooting after its dead
@@ -208,11 +218,17 @@ void ABoids::FireSequence(FVector CurrentLocation, FVector target)
 	}
 }
 
+/// <summary>
+/// Helper method to change the direction so it points to a target
+/// </summary>
 void ABoids::RotateToDirection(float dt, FVector target, float Strength)
 {
 	SetActorRotation(FMath::RInterpConstantTo(GetActorRotation() , UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), target),dt, Strength));
 }
 
+/// <summary>
+/// get all other boids in scene
+/// </summary>
 void ABoids::GetAllBoids()
 {
 	for (TActorIterator<ABoids> It(GetWorld()); It; ++It) {
@@ -222,11 +238,17 @@ void ABoids::GetAllBoids()
 	AllBoids.Remove(this);
 }
 
+/// <summary>
+/// Delegate Call added to 'OnMarked' which are called from the widget component in boids
+/// </summary>
 void ABoids::Targetted()
 {
-	LockedOn.Broadcast(this); //A delegate Call
+	LockedOn.Broadcast(this); //A delegate Call will be listened by Player Character
 }
 
+/// <summary>
+/// Multiplayer replicated variable
+/// </summary>
 void ABoids::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
